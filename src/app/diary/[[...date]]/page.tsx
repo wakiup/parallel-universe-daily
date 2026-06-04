@@ -1,7 +1,7 @@
 import DiaryClient from "./diary-client";
 
 export function generateStaticParams() {
-  return [{ date: "2026-01-01" }];
+  return [[]];
 }
 
 export const dynamic = "force-static";

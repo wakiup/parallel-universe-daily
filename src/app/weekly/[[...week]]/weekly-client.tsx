@@ -123,8 +123,8 @@ function EmptyState({ week }: { week: string }) {
 }
 
 export default function WeeklyClient() {
-  const params = useParams<{ week: string }>();
-  const weekParam = params.week || getCurrentWeek();
+  const params = useParams<{ week?: string[] }>();
+  const weekParam = Array.isArray(params.week) ? params.week[0] : params.week || getCurrentWeek();
 
   const weekInfo = parseWeekParam(weekParam);
 

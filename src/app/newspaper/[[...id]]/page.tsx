@@ -1,7 +1,7 @@
 import NewspaperClient from "./newspaper-client";
 
 export function generateStaticParams() {
-  return [{ id: "placeholder" }];
+  return [[]];
 }
 
 export const dynamic = "force-static";

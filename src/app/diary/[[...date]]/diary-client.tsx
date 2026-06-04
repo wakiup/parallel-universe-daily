@@ -23,8 +23,8 @@ import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DesktopNav } from "@/components/desktop-nav";
 
 export default function DiaryClient() {
-  const params = useParams<{ date: string }>();
-  const date = params.date;
+  const params = useParams<{ date?: string[] }>();
+  const date = Array.isArray(params.date) ? params.date[0] : params.date || new Date().toISOString().slice(0, 10);
 
   const [diary, setDiary] = useState<DiaryEntry | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);

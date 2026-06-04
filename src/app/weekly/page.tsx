@@ -1,7 +1,7 @@
 // src/app/weekly/page.tsx
-// Redirects /weekly to the current week
+// Renders the current week directly (no redirect - incompatible with static export)
 
-import { redirect } from "next/navigation";
+import WeeklyClient from "./[[...week]]/weekly-client";
 
 function getCurrentWeek(): string {
   const now = new Date();
@@ -17,5 +17,8 @@ function getCurrentWeek(): string {
 }
 
 export default function WeeklyIndexPage() {
-  redirect(`/weekly/${getCurrentWeek()}`);
+  // We can't use redirect() with static export
+  // The WeeklyClient reads the week from URL params via useParams
+  // For /weekly (no week param), it defaults to current week
+  return <WeeklyClient />;
 }

@@ -1,7 +1,7 @@
 import WeeklyClient from "./weekly-client";
 
 export function generateStaticParams() {
-  return [{ week: "2026-W01" }];
+  return [[]];
 }
 
 export const dynamic = "force-static";
