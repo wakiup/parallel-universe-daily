@@ -60,7 +60,8 @@ export async function deleteDiary(date: string): Promise<void> {
 // OpenAI client helper
 // ---------------------------------------------------------------------------
 
-function proxyFetch(url: string, init?: RequestInit): Promise<Response> {
+function proxyFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
+  const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
   const body = init?.body ? JSON.parse(init.body as string) : undefined;
   const rawHeaders = init?.headers;
   const headers: Record<string, string> = {};
