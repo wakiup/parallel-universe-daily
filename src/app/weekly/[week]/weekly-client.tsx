@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useLayoutEffect } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -110,13 +111,13 @@ function EmptyState({ week }: { week: string }) {
         <p className="text-xs text-static/50 font-mono mb-6">
           收到的参数: {week}
         </p>
-        <a
+        <Link
           href="/"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-quantum/10 text-quantum border border-quantum/20 text-sm font-medium transition-all hover:bg-quantum/20"
         >
           <ArrowLeft className="w-4 h-4" />
           返回首页
-        </a>
+        </Link>
       </div>
     </div>
   );
@@ -376,24 +377,24 @@ export default function WeeklyClient() {
 
       <main className="relative z-10 max-w-[900px] mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <div className="weekly-week-nav flex items-center justify-center gap-4 mb-10">
-          <a
+          <Link
             href={`/weekly/${prevWeek}`}
             className="flex items-center justify-center size-9 rounded-lg border border-quantum/10 text-void-text transition-colors hover:text-quantum hover:border-quantum/25"
           >
             <ChevronLeft className="w-4 h-4" />
-          </a>
+          </Link>
           <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-abyss/60 border border-quantum/10">
             <Calendar className="w-3.5 h-3.5 text-quantum/60" />
             <span className="text-xs font-mono text-void-text tracking-wide">
               {dateRange}
             </span>
           </div>
-          <a
+          <Link
             href={`/weekly/${nextWeek}`}
             className="flex items-center justify-center size-9 rounded-lg border border-quantum/10 text-void-text transition-colors hover:text-quantum hover:border-quantum/25"
           >
             <ChevronRight className="w-4 h-4" />
-          </a>
+          </Link>
         </div>
 
         {loading || isGenerating ? (

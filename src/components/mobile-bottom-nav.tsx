@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Clock, BookOpen, Calendar, Star, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,7 @@ export function MobileBottomNav() {
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
-            <a
+            <Link
               key={href}
               href={href}
               className={cn(
@@ -52,7 +53,7 @@ export function MobileBottomNav() {
               {active && (
                 <div className="absolute bottom-1 w-4 h-0.5 rounded-full bg-quantum" />
               )}
-            </a>
+            </Link>
           );
         })}
       </div>

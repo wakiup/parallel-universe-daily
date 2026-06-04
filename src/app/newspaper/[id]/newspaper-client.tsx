@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useLayoutEffect } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -85,13 +86,13 @@ export default function NewspaperClient() {
           <p className="text-sm text-void-text mb-6">
             这份报纸可能已从时间线上消失
           </p>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-quantum/10 text-quantum border border-quantum/20 text-sm font-medium hover:bg-quantum/20 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             返回首页
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -203,13 +204,13 @@ export default function NewspaperClient() {
           </div>
 
           <div className="mt-8 text-center">
-            <a
+            <Link
               href="/"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-quantum/10 text-quantum border border-quantum/20 text-sm font-medium hover:bg-quantum/20 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               返回首页
-            </a>
+            </Link>
           </div>
         </div>
       </main>

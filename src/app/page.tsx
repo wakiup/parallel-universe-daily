@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import Link from "next/link";
 import { loadNewspapers, addNewspaper, saveNewspapers, deleteNewspaper, type NewspaperData } from "@/lib/newspapers";
 import { generateNewspaper } from "@/lib/client-api";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
@@ -336,10 +337,10 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            <a href="/history" className="group flex items-center gap-1.5 text-sm text-quantum/70 hover:text-quantum transition-colors">
+            <Link href="/history" className="group flex items-center gap-1.5 text-sm text-quantum/70 hover:text-quantum transition-colors">
               查看全部
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </a>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -513,11 +514,11 @@ function NewspaperCard({
           </div>
 
           {/* Headline */}
-          <a href={`/newspaper/${paper.id}`} className="block">
+          <Link href={`/newspaper/${paper.id}`} className="block">
             <h4 className={`text-[17px] font-serif font-bold text-signal mb-3 leading-snug line-clamp-2 ${colors.hoverText} transition-colors duration-300`}>
               {paper.headline}
             </h4>
-          </a>
+          </Link>
 
           {/* Subheadline */}
           <p className="text-sm text-void-text/70 mb-5 line-clamp-2 leading-relaxed">
@@ -582,7 +583,7 @@ function QuickLink({
   const colors = colorConfig[color];
 
   return (
-    <a
+    <Link
       href={href}
       className={`group relative bg-abyss/40 backdrop-blur-sm border border-quantum/8 ${colors.hoverBorder} rounded-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${colors.glow}`}
     >
@@ -596,6 +597,6 @@ function QuickLink({
         </div>
         <ArrowRight className={`w-4 h-4 ${colors.arrowColor} transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0`} />
       </div>
-    </a>
+    </Link>
   );
 }

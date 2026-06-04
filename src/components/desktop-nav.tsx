@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Newspaper,
   Clock,
@@ -62,12 +63,12 @@ export function DesktopNav({
           {/* Left: optional back arrow + Logo */}
           <div className="flex items-center gap-3">
             {showBackArrow && (
-              <a
+              <Link
                 href={backHref}
                 className="flex items-center justify-center size-9 rounded-lg border border-quantum/10 text-void-text transition-colors hover:text-quantum hover:border-quantum/25"
               >
                 <ArrowLeft className="w-4 h-4" />
-              </a>
+              </Link>
             )}
             <div className="flex items-center gap-3">
               <div className="relative">

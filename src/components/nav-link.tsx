@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export function NavLink({
@@ -10,7 +11,7 @@ export function NavLink({
   children: React.ReactNode;
 }) {
   return (
-    <a
+    <Link
       href={href}
       className={cn(
         "flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200",
@@ -20,6 +21,6 @@ export function NavLink({
       )}
     >
       {children}
-    </a>
+    </Link>
   );
 }
