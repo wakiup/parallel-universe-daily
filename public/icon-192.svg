@@ -1,0 +1,15 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="32" fill="#0A0A0F"/>
+  <rect x="1" y="1" width="190" height="190" rx="31" stroke="url(#gradient)" stroke-width="2"/>
+  <path d="M96 48L120 72H72L96 48Z" fill="#A78BFA"/>
+  <circle cx="96" cy="100" r="24" stroke="#A78BFA" stroke-width="3" fill="none"/>
+  <circle cx="96" cy="100" r="8" fill="#A78BFA"/>
+  <path d="M72 140H120" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"/>
+  <path d="M80 148H112" stroke="#F472B6" stroke-width="2" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="192" y2="192">
+      <stop stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+</svg>

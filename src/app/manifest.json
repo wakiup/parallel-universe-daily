@@ -1,0 +1,53 @@
+{
+  "name": "平行宇宙日报",
+  "short_name": "平行日报",
+  "description": "你的AI驱动平行宇宙生活记录平台",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0A0F",
+  "theme_color": "#A78BFA",
+  "categories": ["lifestyle", "entertainment"],
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "今日日报",
+      "short_name": "日报",
+      "url": "/",
+      "description": "记录今天的平行宇宙事件"
+    },
+    {
+      "name": "写日记",
+      "short_name": "日记",
+      "url": "/diary",
+      "description": "手写或AI生成今日日记"
+    },
+    {
+      "name": "编年史",
+      "short_name": "历史",
+      "url": "/history",
+      "description": "浏览历史日报和日记"
+    }
+  ]
+}
