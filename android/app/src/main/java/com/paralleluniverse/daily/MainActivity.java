@@ -14,8 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
 
-    // 改成你部署后的地址，本地测试用 http://10.0.2.2:3456
-    private static final String BASE_URL = "http://10.0.2.2:3456";
+    private static final String BASE_URL = "https://parallel-universe-daily.pages.dev";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
