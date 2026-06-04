@@ -1,9 +1,7 @@
 // Cloudflare Pages Function: proxy API requests to bypass CORS
 // POST /api/proxy  { url: string, headers: Record<string,string>, body: object }
 
-interface Env {}
-
-export const onRequest: PagesFunction<Env> = async (context) => {
+export const onRequest = async (context: { request: Request }) => {
   if (context.request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
