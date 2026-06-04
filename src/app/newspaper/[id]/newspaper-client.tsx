@@ -43,8 +43,8 @@ const colorConfig = {
 };
 
 export default function NewspaperClient() {
-  const params = useParams<{ id?: string[] }>();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const params = useParams<{ id?: string }>();
+  const id = params.id;
 
   const [paper, setPaper] = useState<NewspaperData | null>(null);
   const [notFound, setNotFound] = useState(false);
