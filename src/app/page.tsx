@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { loadNewspapers, addNewspaper, saveNewspapers, type NewspaperData } from "@/lib/newspapers";
-import { getApiConfig } from "@/lib/api-config";
+import { generateNewspaper } from "@/lib/client-api";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DesktopNav } from "@/components/desktop-nav";
 import { Newspaper, BookOpen, Calendar, Clock, Sparkles, Send, History, Settings, Star, Radio, Wifi, Globe, ArrowRight, BookMarked } from "lucide-react";
@@ -160,17 +160,10 @@ export default function HomePage() {
     if (!inputValue.trim() || isGenerating) return;
     setIsGenerating(true);
     try {
-      const res = await fetch("/api/newspaper/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: inputValue, config: getApiConfig() }),
-      });
-      const data = await res.json();
-      if (data.newspaper) {
-        const updated = addNewspaper(data.newspaper);
-        setNewspapers(updated);
-        setInputValue("");
-      }
+      const newspaper = await generateNewspaper(inputValue);
+      const updated = addNewspaper(newspaper);
+      setNewspapers(updated);
+      setInputValue("");
     } catch {
       setError("生成失败，请稍后重试");
       setTimeout(() => setError(null), 5000);
