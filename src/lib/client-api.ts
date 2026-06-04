@@ -55,7 +55,6 @@ export async function deleteDiary(date: string): Promise<void> {
   const updated = diaries.filter((d) => d.date !== date);
   saveAllDiaries(updated);
 }
-}
 
 // ---------------------------------------------------------------------------
 // OpenAI client helper
