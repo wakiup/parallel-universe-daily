@@ -60,10 +60,41 @@ export async function deleteDiary(date: string): Promise<void> {
 // OpenAI client helper
 // ---------------------------------------------------------------------------
 
+function proxyFetch(url: string, init?: RequestInit): Promise<Response> {
+  const body = init?.body ? JSON.parse(init.body as string) : undefined;
+  const rawHeaders = init?.headers;
+  const headers: Record<string, string> = {};
+  if (rawHeaders instanceof Headers) {
+    rawHeaders.forEach((v, k) => { headers[k] = v; });
+  } else if (rawHeaders && typeof rawHeaders === "object") {
+    Object.entries(rawHeaders).forEach(([k, v]) => { headers[k] = String(v); });
+  }
+  return fetch("/api/proxy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, headers, body }),
+  });
+}
+
 function getClient() {
   const config = getApiConfig();
-  if (!config?.apiKey || !config?.apiBaseUrl) return null;
-  return new OpenAI({ apiKey: config.apiKey, baseURL: config.apiBaseUrl, dangerouslyAllowBrowser: true });
+  if (!config) return null;
+  if (!config.apiKey) return null;
+  if (!config.apiBaseUrl) return null;
+  return new OpenAI({
+    apiKey: config.apiKey,
+    baseURL: config.apiBaseUrl,
+    dangerouslyAllowBrowser: true,
+    fetch: proxyFetch,
+  });
+}
+
+function getClientError(): string | null {
+  const config = getApiConfig();
+  if (!config) return "请先在设置页面配置 API";
+  if (!config.apiKey) return "请在设置页面填写 API Key";
+  if (!config.apiBaseUrl) return "请在设置页面选择服务商或填写 API 地址";
+  return null;
 }
 
 function getModel(): string {
