@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { RefreshCw, Download, Share2, Newspaper, Sparkles, Check, Image, PenLine, FileText } from "lucide-react";
+import { RefreshCw, Download, Share2, Newspaper, Sparkles, Check, Image, PenLine, FileText, Trash2 } from "lucide-react";
 import { toJpeg } from "html-to-image";
 import { cn } from "@/lib/utils";
 import { DiaryHeader } from "./diary-header";
@@ -11,6 +11,7 @@ import type { DiaryEntry } from "@/lib/types";
 interface DiaryContentProps {
   diary: DiaryEntry | null;
   onRegenerate: () => void;
+  onDelete: () => void;
   isGenerating: boolean;
 }
 
@@ -92,6 +93,7 @@ function GeneratingOverlay() {
 export function DiaryContent({
   diary,
   onRegenerate,
+  onDelete,
   isGenerating,
 }: DiaryContentProps) {
   const exportRef = useRef<HTMLDivElement>(null);
@@ -301,6 +303,20 @@ export function DiaryContent({
             <Share2 className="size-4" />
           )}
           {shareState === "copied" ? "已复制链接" : "分享"}
+        </button>
+
+        <button
+          onClick={onDelete}
+          className={cn(
+            "flex items-center gap-2 rounded-lg px-4 py-2",
+            "bg-red-500/10 text-red-400 border border-red-500/20",
+            "text-sm font-medium ml-auto",
+            "transition-all duration-200 hover:bg-red-500/20 hover:border-red-500/30",
+            "active:scale-[0.97]"
+          )}
+        >
+          <Trash2 className="size-4" />
+          删除
         </button>
       </div>
     </div>

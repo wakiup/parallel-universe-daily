@@ -41,6 +41,13 @@ export function getNewspapersByDate(date: string): NewspaperData[] {
   return loadNewspapers().filter((n) => n.timestamp.startsWith(date));
 }
 
+export function deleteNewspaper(id: string): NewspaperData[] {
+  const existing = loadNewspapers();
+  const updated = existing.filter((n) => n.id !== id);
+  saveNewspapers(updated);
+  return updated;
+}
+
 export function getNewspapersByWeek(
   startDate: string,
   endDate: string

@@ -50,6 +50,13 @@ export async function getDiariesByMonth(year: number, month: number): Promise<Di
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+export async function deleteDiary(date: string): Promise<void> {
+  const diaries = loadAllDiaries();
+  const updated = diaries.filter((d) => d.date !== date);
+  saveAllDiaries(updated);
+}
+}
+
 // ---------------------------------------------------------------------------
 // OpenAI client helper
 // ---------------------------------------------------------------------------

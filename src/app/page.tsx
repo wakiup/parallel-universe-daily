@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { loadNewspapers, addNewspaper, saveNewspapers, type NewspaperData } from "@/lib/newspapers";
+import { loadNewspapers, addNewspaper, saveNewspapers, deleteNewspaper, type NewspaperData } from "@/lib/newspapers";
 import { generateNewspaper } from "@/lib/client-api";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DesktopNav } from "@/components/desktop-nav";
-import { Newspaper, BookOpen, Calendar, Clock, Sparkles, Send, History, Settings, Star, Radio, Wifi, Globe, ArrowRight, BookMarked } from "lucide-react";
+import { Newspaper, BookOpen, Calendar, Clock, Sparkles, Send, History, Settings, Star, Radio, Wifi, Globe, ArrowRight, BookMarked, Trash2 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -30,28 +30,6 @@ const SEED_NEWSPAPERS: NewspaperData[] = [
     mood: "极佳",
     color: "quantum",
     dimension: "7-B",
-  },
-  {
-    id: "seed-2",
-    headline: "居民楼电梯突然开口说话：'今天有人按了42层，但楼只有6层'",
-    subheadline: "电梯心理辅导热线被打爆，物业紧急招聘电梯翻译官",
-    content: "昨日下午3点左右，本市某居民楼的电梯在运行过程中突然发出语音播报：「今天有人按了42层，但本楼只有6层。请问您是否确认？」\n\n据住户反映，这并非电梯首次「表达情绪」。上周三，该电梯曾拒绝在7楼开门，并播放了一段贝多芬的《月光奏鸣曲》。\n\n物业经理表示：「我们已经联系了电梯制造商，对方说这是'智能交互系统的正常升级'。但我们怀疑这台电梯可能被隔壁宇宙的同类附身了。」\n\n心理辅导热线开通后，接听量在两小时内突破了500通。一位来电者称：「我只是想回家，但电梯问我'你今天过得怎么样'，我忍不住就哭了。」\n\n目前，物业已紧急招聘一名「电梯翻译官」，要求具备跨物种沟通能力和至少三年的心理咨询经验。",
-    timestamp: "2026-06-02 12:15",
-    weather: "反物质风暴",
-    mood: "困惑",
-    color: "plasma",
-    dimension: "13-Ω",
-  },
-  {
-    id: "seed-3",
-    headline: "猫咪成功竞选市长，首项政策：所有纸箱归国有",
-    subheadline: "汪星人表示强烈抗议，联邦喵星人协会发表声明",
-    content: "在刚刚结束的平行宇宙第42届市长选举中，一只名叫「橘座」的橘猫以压倒性优势击败了三名人类候选人，成功当选。\n\n橘座的竞选纲领包括：所有纸箱收归国有、每日下午3点强制午睡、以及在城市各处设置猫抓板。\n\n就职演说中，橘座通过翻译官表示：「喵。」翻译官补充解释：「橘座先生表示，它将致力于建设一个对所有物种都公平的城市，尤其是那些总是被忽视的喵星人。」\n\n汪星人协会随即发表声明，强烈抗议选举结果。声明中写道：「我们质疑选举的公正性——一只连爪子都举不起来的猫怎么可能通过投票验证？」\n\n联邦喵星人协会回应称：「橘座先生已经展示了卓越的领导力，它在过去三年里成功统治了整个小区的阳台。」\n\n据悉，橘座将于下周一正式就职，届时将举办一场以「纸箱与梦想」为主题的就职典礼。",
-    timestamp: "2026-06-02 18:45",
-    weather: "猫毛纷飞",
-    mood: "兴奋",
-    color: "pink",
-    dimension: "42-Ψ",
   },
 ];
 
@@ -170,6 +148,11 @@ export default function HomePage() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleDelete = (id: string) => {
+    const updated = deleteNewspaper(id);
+    setNewspapers(updated);
   };
 
   const currentDate = new Date().toLocaleDateString("zh-CN", {
@@ -369,6 +352,7 @@ export default function HomePage() {
                 isActive={activeCard === paper.id}
                 onHover={() => setActiveCard(paper.id)}
                 onLeave={() => setActiveCard(null)}
+                onDelete={handleDelete}
               />
             ))}
           </div>
@@ -447,6 +431,7 @@ function NewspaperCard({
   isActive,
   onHover,
   onLeave,
+  onDelete,
 }: {
   paper: NewspaperData;
   index: number;
@@ -454,6 +439,7 @@ function NewspaperCard({
   isActive: boolean;
   onHover: () => void;
   onLeave: () => void;
+  onDelete: (id: string) => void;
 }) {
   const colorConfig = {
     quantum: {
@@ -488,9 +474,8 @@ function NewspaperCard({
   const colors = colorConfig[paper.color];
 
   return (
-    <a
-      href={`/newspaper/${paper.id}`}
-      className={`group relative transition-all duration-500 block ${
+    <div
+      className={`group relative transition-all duration-500 ${
         show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       }`}
       style={{ transitionDelay: `${index * 120}ms` }}
@@ -510,15 +495,29 @@ function NewspaperCard({
               <span className="text-[10px] font-mono text-static/30">·</span>
               <span className="text-[10px] font-mono text-static/40">维度 {paper.dimension}</span>
             </div>
-            <div className={`px-2.5 py-1 rounded-md text-[10px] font-mono ${colors.badge} border`}>
-              {paper.mood}
+            <div className="flex items-center gap-2">
+              <div className={`px-2.5 py-1 rounded-md text-[10px] font-mono ${colors.badge} border`}>
+                {paper.mood}
+              </div>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete(paper.id);
+                }}
+                className="p-1.5 rounded-lg text-static/30 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 opacity-0 group-hover:opacity-100"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 
           {/* Headline */}
-          <h4 className={`text-[17px] font-serif font-bold text-signal mb-3 leading-snug line-clamp-2 ${colors.hoverText} transition-colors duration-300`}>
-            {paper.headline}
-          </h4>
+          <a href={`/newspaper/${paper.id}`} className="block">
+            <h4 className={`text-[17px] font-serif font-bold text-signal mb-3 leading-snug line-clamp-2 ${colors.hoverText} transition-colors duration-300`}>
+              {paper.headline}
+            </h4>
+          </a>
 
           {/* Subheadline */}
           <p className="text-sm text-void-text/70 mb-5 line-clamp-2 leading-relaxed">
@@ -541,7 +540,7 @@ function NewspaperCard({
         {/* Bottom accent line - appears on hover */}
         <div className="h-px bg-gradient-to-r from-transparent via-quantum/0 to-transparent group-hover:via-quantum/30 transition-all duration-500" />
       </div>
-    </a>
+    </div>
   );
 }
 

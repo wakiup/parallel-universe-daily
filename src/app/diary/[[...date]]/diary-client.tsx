@@ -11,6 +11,7 @@ import {
   Sparkles,
   PenLine,
   X,
+  Trash2,
 } from "lucide-react";
 import gsap from "gsap";
 import { cn } from "@/lib/utils";
@@ -18,7 +19,7 @@ import { EventList } from "@/components/diary/event-list";
 import { DiaryContent } from "@/components/diary/diary-content";
 import { getNewspapersByDate, type NewspaperData } from "@/lib/newspapers";
 import type { Event, DiaryEntry, DiaryStyle, ProcessMode } from "@/lib/types";
-import { getDiaryByDate, saveDiary, generateDiary, processContent } from "@/lib/client-api";
+import { getDiaryByDate, saveDiary, deleteDiary, generateDiary, processContent } from "@/lib/client-api";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DesktopNav } from "@/components/desktop-nav";
 
@@ -123,6 +124,12 @@ export default function DiaryClient() {
 
   const handleRegenerate = () => {
     handleGenerate();
+  };
+
+  const handleDelete = async () => {
+    if (!date) return;
+    await deleteDiary(date);
+    setDiary(null);
   };
 
   const handleWriteManual = () => {
@@ -329,6 +336,7 @@ export default function DiaryClient() {
               <DiaryContent
                 diary={diary}
                 onRegenerate={handleRegenerate}
+                onDelete={handleDelete}
                 isGenerating={isGenerating}
               />
             )}
