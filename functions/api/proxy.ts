@@ -38,7 +38,6 @@ export const onRequest = async (context: { request: Request }) => {
       body: JSON.stringify(body),
     });
 
-    // Stream the response body directly to avoid buffering large SSE streams
     const contentType = apiResponse.headers.get("Content-Type") || "application/json";
     return new Response(apiResponse.body, {
       status: apiResponse.status,

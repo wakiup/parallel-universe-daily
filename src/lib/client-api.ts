@@ -27,19 +27,17 @@ function saveAllDiaries(diaries: DiaryEntry[]): void {
   localStorage.setItem(DIARY_KEY, JSON.stringify(diaries));
 }
 
-export async function getDiaryByDate(date: string): Promise<DiaryEntry | null> {
+export async function getDiariesByDate(date: string): Promise<DiaryEntry[]> {
   const diaries = loadAllDiaries();
-  return diaries.find((d) => d.date === date) ?? null;
+  return diaries
+    .filter((d) => d.date === date)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
-export async function saveDiary(diary: DiaryEntry): Promise<void> {
+export async function appendDiary(diary: DiaryEntry): Promise<void> {
   const diaries = loadAllDiaries();
-  const idx = diaries.findIndex((d) => d.date === diary.date);
-  if (idx >= 0) {
-    diaries[idx] = diary;
-  } else {
-    diaries.push(diary);
-  }
+  if (diaries.some((d) => d.id === diary.id)) return;
+  diaries.push(diary);
   saveAllDiaries(diaries);
 }
 
@@ -50,9 +48,9 @@ export async function getDiariesByMonth(year: number, month: number): Promise<Di
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export async function deleteDiary(date: string): Promise<void> {
+export async function deleteDiaryById(id: string): Promise<void> {
   const diaries = loadAllDiaries();
-  const updated = diaries.filter((d) => d.date !== date);
+  const updated = diaries.filter((d) => d.id !== id);
   saveAllDiaries(updated);
 }
 
@@ -269,7 +267,6 @@ export async function generateDiary(
     updatedAt: new Date().toISOString(),
   };
 
-  await saveDiary(diary);
   return diary;
 }
 

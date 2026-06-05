@@ -5,9 +5,11 @@ import { usePathname } from "next/navigation";
 import { Clock, BookOpen, Calendar, Star, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const today = new Date().toISOString().slice(0, 10);
+
 const NAV_ITEMS = [
   { href: "/", label: "今日", icon: Clock },
-  { href: "/diary", label: "日记", icon: BookOpen },
+  { href: `/diary/${today}`, label: "日记", icon: BookOpen },
   { href: "/weekly", label: "周报", icon: Calendar },
   { href: "/history", label: "编年史", icon: Star },
   { href: "/settings", label: "设置", icon: Settings },

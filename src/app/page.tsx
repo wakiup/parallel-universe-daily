@@ -514,11 +514,11 @@ function NewspaperCard({
           </div>
 
           {/* Headline */}
-          <Link href={`/newspaper/${paper.id}`} className="block">
+          <a href={`/newspaper/${paper.id}`} className="block">
             <h4 className={`text-[17px] font-serif font-bold text-signal mb-3 leading-snug line-clamp-2 ${colors.hoverText} transition-colors duration-300`}>
               {paper.headline}
             </h4>
-          </Link>
+          </a>
 
           {/* Subheadline */}
           <p className="text-sm text-void-text/70 mb-5 line-clamp-2 leading-relaxed">

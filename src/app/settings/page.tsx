@@ -18,6 +18,8 @@ import {
   Globe,
   Cpu,
   Zap,
+  Download,
+  Upload,
 } from "lucide-react";
 import gsap from "gsap";
 import { cn } from "@/lib/utils";
@@ -350,6 +352,46 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const handleExport = () => {
+    const data = {
+      settings: JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"),
+      diaries: JSON.parse(localStorage.getItem("parallel-universe-diaries") || "[]"),
+      newspapers: JSON.parse(localStorage.getItem("parallel-universe-newspapers") || "[]"),
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `parallel-universe-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target?.result as string);
+          if (data.settings) localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
+          if (data.diaries) localStorage.setItem("parallel-universe-diaries", JSON.stringify(data.diaries));
+          if (data.newspapers) localStorage.setItem("parallel-universe-newspapers", JSON.stringify(data.newspapers));
+          window.location.reload();
+        } catch {
+          alert("文件格式不正确，请选择正确的备份文件");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   // Date display
   const currentDate = new Date().toLocaleDateString("zh-CN", {
     year: "numeric",
@@ -568,6 +610,26 @@ export default function SettingsPage() {
             </p>
           </div>
         </SettingsSection>
+
+        {/* ---- Data backup ---- */}
+        <div className="flex gap-3 mb-10">
+          <button
+            type="button"
+            onClick={handleExport}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-quantum/15 bg-abyss/40 text-sm text-void-text hover:border-quantum/25 hover:bg-abyss/60 transition-all duration-300"
+          >
+            <Download className="w-4 h-4" />
+            备份数据
+          </button>
+          <button
+            type="button"
+            onClick={handleImport}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-quantum/15 bg-abyss/40 text-sm text-void-text hover:border-quantum/25 hover:bg-abyss/60 transition-all duration-300"
+          >
+            <Upload className="w-4 h-4" />
+            恢复数据
+          </button>
+        </div>
 
         {/* ---- Save button ---- */}
         <div className="settings-footer flex justify-start">

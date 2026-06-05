@@ -15,6 +15,7 @@ import gsap from "gsap";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DesktopNav } from "@/components/desktop-nav";
 import type { DiaryEntry } from "@/lib/types";
+import { getDiariesByMonth } from "@/lib/client-api";
 import Timeline from "@/components/history/timeline";
 
 // ---- Main Page ----
@@ -27,37 +28,14 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch real diaries from API
+  // Load diaries from localStorage
   useEffect(() => {
-    let cancelled = false;
     setLoading(true);
     setError(null);
-
-    async function fetchDiaries() {
-      try {
-        const res = await fetch(
-          `/api/diary/list?year=${currentYear}&month=${currentMonth}`
-        );
-        if (!res.ok) throw new Error("API request failed");
-        const data = await res.json();
-        if (!cancelled) {
-          setEntries(data.diaries ?? []);
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setEntries([]);
-          setError("无法加载日记数据，请检查 API 连接后重试");
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchDiaries();
-
-    return () => {
-      cancelled = true;
-    };
+    getDiariesByMonth(currentYear, currentMonth).then((diaries) => {
+      setEntries(diaries);
+      setLoading(false);
+    });
   }, [currentYear, currentMonth]);
 
   const pageRef = useRef<HTMLDivElement>(null);
