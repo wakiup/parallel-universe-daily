@@ -239,14 +239,16 @@ export default function WeeklyClient() {
         dimension: "7-B",
       };
     });
-    // Build highlights: newspaper first, then diaries, no duplicates
+    // Build highlights: newspaper first, then diaries, no duplicates (by ID and content)
     const allHighlights: WeeklyHighlight[] = [];
     const usedIds = new Set<string>();
+    const usedHeadlines = new Set<string>();
     // Pick one random newspaper as "本周最佳"
     if (paperHighlights.length > 0) {
       const pick = paperHighlights[Math.floor(Math.random() * paperHighlights.length)];
       allHighlights.push(pick);
       usedIds.add(pick.id);
+      usedHeadlines.add(pick.headline);
     }
     // Fill remaining slots from shuffled pool (newspapers first, then diaries)
     const pool = [...paperHighlights, ...diaryHighlights]
@@ -254,9 +256,10 @@ export default function WeeklyClient() {
       .sort(() => Math.random() - 0.5);
     for (const h of pool) {
       if (allHighlights.length >= 3) break;
-      if (!usedIds.has(h.id)) {
+      if (!usedIds.has(h.id) && !usedHeadlines.has(h.headline)) {
         allHighlights.push(h);
         usedIds.add(h.id);
+        usedHeadlines.add(h.headline);
       }
     }
     const highlights = allHighlights;
