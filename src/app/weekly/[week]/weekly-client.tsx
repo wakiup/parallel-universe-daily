@@ -136,8 +136,8 @@ export default function WeeklyClient() {
     const endStr = formatDateISO(weekInfo.endDate);
     const weekNewspapers = getNewspapersByWeek(startStr, endStr);
 
-    // Read diary data from localStorage
-    let weekDiaries: { date: string }[] = [];
+    // Read diary data from localStorage (full data including content)
+    let weekDiaries: { id: string; date: string; type: string; content: string; style?: string; createdAt: string }[] = [];
     try {
       const diaryRaw = localStorage.getItem("parallel-universe-diaries");
       if (diaryRaw) {
@@ -158,9 +158,45 @@ export default function WeeklyClient() {
       d.setDate(d.getDate() + i);
       const dateStr = formatDateISO(d);
       const dayPapers = weekNewspapers.filter((n) => n.timestamp.startsWith(dateStr));
-      const dayDiaryCount = weekDiaries.filter((dy) => dy.date === dateStr).length;
+      const dayDiaries = weekDiaries.filter((dy) => dy.date === dateStr);
 
-      if (dayPapers.length > 0) {
+      if (dayPapers.length > 0 && dayDiaries.length > 0) {
+        // Both newspaper and diary data exist — combine them
+        const first = dayPapers[0];
+        const diarySnippets = dayDiaries.map((dy) => {
+          const text = (dy.content || "").replace(/\n/g, " ").slice(0, 60);
+          return text.length < (dy.content || "").replace(/\n/g, " ").length ? text + "..." : text;
+        });
+        dailyEntries.push({
+          date: dateStr,
+          dayLabel: DAY_NAMES[d.getDay()],
+          headline: first.headline,
+          subheadline: `${first.subheadline} | ${dayDiaries.length}篇日记: ${diarySnippets[0] || ""}`,
+          mood: first.mood,
+          weather: first.weather,
+          color: first.color,
+          dimension: first.dimension,
+          eventCount: dayPapers.length,
+          diaryCount: dayDiaries.length,
+        });
+      } else if (dayDiaries.length > 0) {
+        // Only diary data, no newspapers
+        const firstDiary = dayDiaries[0];
+        const snippet = (firstDiary.content || "").replace(/\n/g, " ").slice(0, 80);
+        const headline = snippet.length < (firstDiary.content || "").replace(/\n/g, " ").length ? snippet + "..." : snippet || `共 ${dayDiaries.length} 篇日记`;
+        dailyEntries.push({
+          date: dateStr,
+          dayLabel: DAY_NAMES[d.getDay()],
+          headline,
+          subheadline: dayDiaries.length > 1 ? `还有 ${dayDiaries.length - 1} 篇日记` : `${firstDiary.type === "ai" ? "AI生成" : "手写"}日记`,
+          mood: "平静",
+          weather: "微风",
+          color: "plasma",
+          dimension: "7-B",
+          eventCount: 0,
+          diaryCount: dayDiaries.length,
+        });
+      } else if (dayPapers.length > 0) {
         const first = dayPapers[0];
         dailyEntries.push({
           date: dateStr,
@@ -172,29 +208,16 @@ export default function WeeklyClient() {
           color: first.color,
           dimension: first.dimension,
           eventCount: dayPapers.length,
-          diaryCount: dayDiaryCount,
-        });
-      } else if (dayDiaryCount > 0) {
-        dailyEntries.push({
-          date: dateStr,
-          dayLabel: DAY_NAMES[d.getDay()],
-          headline: `共 ${dayDiaryCount} 篇日记`,
-          subheadline: "今日暂无报纸事件，但留下了文字记录",
-          mood: "平静",
-          weather: "微风",
-          color: "plasma",
-          dimension: "7-B",
-          eventCount: 0,
-          diaryCount: dayDiaryCount,
+          diaryCount: 0,
         });
       }
     }
 
-    const shuffled = [...weekNewspapers].sort(() => Math.random() - 0.5);
-    const highlights: WeeklyHighlight[] = shuffled.slice(0, 3).map((p, i) => {
+    // Build highlights from both newspapers and diaries
+    const paperHighlights: WeeklyHighlight[] = weekNewspapers.map((p, i) => {
       const d = new Date(p.timestamp.split(" ")[0] + "T00:00:00");
       return {
-        id: `hl-${i}`,
+        id: `paper-${i}`,
         headline: p.headline,
         subheadline: p.subheadline,
         day: DAY_NAMES[d.getDay()],
@@ -203,6 +226,22 @@ export default function WeeklyClient() {
         dimension: p.dimension,
       };
     });
+    const diaryHighlights: WeeklyHighlight[] = weekDiaries.map((dy, i) => {
+      const d = new Date(dy.date + "T00:00:00");
+      const snippet = (dy.content || "").replace(/\n/g, " ").slice(0, 60);
+      return {
+        id: `diary-${i}`,
+        headline: snippet || "日记记录",
+        subheadline: dy.type === "ai" ? "AI 生成日记" : "手写日记",
+        day: DAY_NAMES[d.getDay()],
+        mood: "平静",
+        color: "plasma",
+        dimension: "7-B",
+      };
+    });
+    const allHighlights = [...paperHighlights, ...diaryHighlights];
+    const shuffled = allHighlights.sort(() => Math.random() - 0.5);
+    const highlights: WeeklyHighlight[] = shuffled.slice(0, 3);
 
     const moodCounts: Record<string, number> = {};
     const dimCounts: Record<string, number> = {};
