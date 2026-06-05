@@ -14,6 +14,7 @@ import {
   BarChart3,
   Quote,
   BookOpen,
+  FileText,
 } from "lucide-react";
 import gsap from "gsap";
 import { cn } from "@/lib/utils";
@@ -180,6 +181,41 @@ function CoverSection({
 
       {/* Bottom decorative gradient bar */}
       <div className="h-px bg-gradient-to-r from-transparent via-quantum/20 to-transparent" />
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// WeeklySummary - AI-generated weekly summary
+// ---------------------------------------------------------------------------
+
+function WeeklySummary({ summary }: { summary: string }) {
+  if (!summary) return null;
+
+  return (
+    <section className="mb-16">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-quantum/20 to-nebula-pink/20 border border-quantum/15">
+          <FileText className="w-5 h-5 text-quantum" />
+        </div>
+        <div>
+          <h2 className="text-xl font-serif font-bold text-signal">
+            本周总结
+          </h2>
+          <p className="text-xs font-mono text-static/60 mt-0.5">
+            WEEKLY SUMMARY
+          </p>
+        </div>
+      </div>
+
+      <div className="relative border border-quantum/15 rounded-2xl bg-abyss/60 backdrop-blur-sm overflow-hidden">
+        <div className="h-px bg-gradient-to-r from-quantum/20 via-plasma/20 to-nebula-pink/20" />
+        <div className="px-6 sm:px-10 py-8 sm:py-10">
+          <p className="text-sm sm:text-base leading-relaxed font-serif text-void-text/80">
+            {summary}
+          </p>
+        </div>
+      </div>
     </section>
   );
 }
@@ -648,6 +684,7 @@ export function WeeklyReportDisplay({
         year={year}
         dateRange={dateRange}
       />
+      <WeeklySummary summary={report.weeklySummary} />
       <HighlightsSection highlights={report.highlights} />
       <DayGrid entries={report.dailyEntries} />
       <StatsSection stats={report.stats} />
