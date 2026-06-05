@@ -136,7 +136,19 @@ export default function WeeklyClient() {
     const endStr = formatDateISO(weekInfo.endDate);
     const weekNewspapers = getNewspapersByWeek(startStr, endStr);
 
-    if (weekNewspapers.length === 0) return null;
+    // Read diary data from localStorage
+    let weekDiaries: { date: string }[] = [];
+    try {
+      const diaryRaw = localStorage.getItem("parallel-universe-diaries");
+      if (diaryRaw) {
+        weekDiaries = JSON.parse(diaryRaw).filter((d: { date: string }) =>
+          d.date >= startStr && d.date <= endStr
+        );
+      }
+    } catch { /* ignore */ }
+
+    const totalDiaries = weekDiaries.length;
+    if (weekNewspapers.length === 0 && totalDiaries === 0) return null;
 
     const DAY_NAMES = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
@@ -146,6 +158,7 @@ export default function WeeklyClient() {
       d.setDate(d.getDate() + i);
       const dateStr = formatDateISO(d);
       const dayPapers = weekNewspapers.filter((n) => n.timestamp.startsWith(dateStr));
+      const dayDiaryCount = weekDiaries.filter((dy) => dy.date === dateStr).length;
 
       if (dayPapers.length > 0) {
         const first = dayPapers[0];
@@ -159,6 +172,20 @@ export default function WeeklyClient() {
           color: first.color,
           dimension: first.dimension,
           eventCount: dayPapers.length,
+          diaryCount: dayDiaryCount,
+        });
+      } else if (dayDiaryCount > 0) {
+        dailyEntries.push({
+          date: dateStr,
+          dayLabel: DAY_NAMES[d.getDay()],
+          headline: `共 ${dayDiaryCount} 篇日记`,
+          subheadline: "今日暂无报纸事件，但留下了文字记录",
+          mood: "平静",
+          weather: "微风",
+          color: "plasma",
+          dimension: "7-B",
+          eventCount: 0,
+          diaryCount: dayDiaryCount,
         });
       }
     }
@@ -188,16 +215,28 @@ export default function WeeklyClient() {
 
     const stats: WeeklyStats = {
       totalEvents: weekNewspapers.length,
+      totalDiaries,
       mostCommonMood,
       mostVisitedDimension,
       activeDays: dailyEntries.length,
       dimensionsVisited: Object.keys(dimCounts).length,
     };
 
+    // Build weekly summary from local data
+    const activeDayEntries = dailyEntries.filter(e => e.eventCount > 0 || e.diaryCount > 0);
+    const topDay = activeDayEntries.sort((a, b) => b.eventCount - a.eventCount)[0];
+    const weeklySummary = [
+      `本周平行宇宙编辑部共记录 ${weekNewspapers.length} 起异常事件，写下 ${totalDiaries} 篇日记。`,
+      topDay ? `最活跃的一天是${topDay.dayLabel}（${topDay.date.slice(5)}），当天发生了「${topDay.headline}」。` : "",
+      totalDiaries > 0 ? `本周共产出 ${totalDiaries} 篇日记，记录了来自不同维度的观察与思考。` : "",
+      `整体氛围偏「${mostCommonMood}」，主要活动维度为 ${mostVisitedDimension}。`,
+    ].filter(Boolean).join("");
+
     return {
       week: weekParam,
       title: "PARALLEL UNIVERSE WEEKLY",
-      summary: `本周平行宇宙编辑部共记录 ${weekNewspapers.length} 起异常事件，横跨 ${Object.keys(dimCounts).length} 个维度。最常见的心情是「${mostCommonMood}」，主要活动维度为 ${mostVisitedDimension}。本报特约观察员表示：「这周的平行宇宙相当精彩。」`,
+      summary: `本周平行宇宙编辑部共记录 ${weekNewspapers.length} 起异常事件，写下 ${totalDiaries} 篇日记，横跨 ${Object.keys(dimCounts).length} 个维度。最常见的心情是「${mostCommonMood}」，主要活动维度为 ${mostVisitedDimension}。`,
+      weeklySummary,
       highlights,
       dailyEntries,
       stats,
@@ -208,59 +247,7 @@ export default function WeeklyClient() {
   const [report, setReport] = useState<WeeklyReport | null>(() => {
     if (typeof window !== "undefined") {
       try {
-        const match = weekParam.match(/^(\d{4})-W(\d{2})$/);
-        if (match) {
-          const year = parseInt(match[1], 10);
-          const weekNum = parseInt(match[2], 10);
-          const jan4 = new Date(year, 0, 4);
-          const dayOfWeekJan4 = jan4.getDay() || 7;
-          const week1Start = new Date(jan4);
-          week1Start.setDate(jan4.getDate() - dayOfWeekJan4 + 1);
-          const startDate = new Date(week1Start);
-          startDate.setDate(week1Start.getDate() + (weekNum - 1) * 7);
-          const endDate = new Date(startDate);
-          endDate.setDate(endDate.getDate() + 6);
-          const startStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, "0")}-${String(startDate.getDate()).padStart(2, "0")}`;
-          const endStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-${String(endDate.getDate()).padStart(2, "0")}`;
-          const raw = localStorage.getItem("parallel-universe-newspapers");
-          if (raw) {
-            const papers = JSON.parse(raw).filter((n: { timestamp: string }) => {
-              const d = n.timestamp.split(" ")[0];
-              return d >= startStr && d <= endStr;
-            });
-            if (papers.length > 0) {
-              const DAY_NAMES = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-              const dailyEntries = [];
-              for (let i = 0; i < 7; i++) {
-                const d = new Date(startDate);
-                d.setDate(d.getDate() + i);
-                const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-                const dayPapers = papers.filter((n: { timestamp: string }) => n.timestamp.startsWith(dateStr));
-                if (dayPapers.length > 0) {
-                  const first = dayPapers[0];
-                  dailyEntries.push({ date: dateStr, dayLabel: DAY_NAMES[d.getDay()], headline: first.headline, subheadline: first.subheadline, mood: first.mood, weather: first.weather, color: first.color, dimension: first.dimension, eventCount: dayPapers.length });
-                }
-              }
-              const shuffled = [...papers].sort(() => Math.random() - 0.5);
-              const highlights = shuffled.slice(0, 3).map((p: { headline: string; subheadline: string; timestamp: string; mood: string; color: string; dimension: string }, i: number) => {
-                const dd = new Date(p.timestamp.split(" ")[0] + "T00:00:00");
-                return { id: `hl-${i}`, headline: p.headline, subheadline: p.subheadline, day: DAY_NAMES[dd.getDay()], mood: p.mood, color: p.color as "quantum" | "plasma" | "pink", dimension: p.dimension };
-              });
-              const moodCounts: Record<string, number> = {};
-              const dimCounts: Record<string, number> = {};
-              papers.forEach((p: { mood: string; dimension: string }) => { moodCounts[p.mood] = (moodCounts[p.mood] || 0) + 1; dimCounts[p.dimension] = (dimCounts[p.dimension] || 0) + 1; });
-              const mostCommonMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "平静";
-              const mostVisitedDimension = Object.entries(dimCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "7-B";
-              return {
-                week: weekParam, title: "PARALLEL UNIVERSE WEEKLY",
-                summary: `本周共记录 ${papers.length} 起异常事件，横跨 ${Object.keys(dimCounts).length} 个维度。最常见心情「${mostCommonMood}」，主要维度 ${mostVisitedDimension}。`,
-                highlights, dailyEntries,
-                stats: { totalEvents: papers.length, mostCommonMood, mostVisitedDimension, activeDays: dailyEntries.length, dimensionsVisited: Object.keys(dimCounts).length },
-                generatedAt: new Date().toISOString(),
-              };
-            }
-          }
-        }
+        return buildReportFromStorage();
       } catch { /* ignore */ }
     }
     return null;
@@ -315,6 +302,7 @@ export default function WeeklyClient() {
         week: weekParam,
         title: (reportData.title as string) || "PARALLEL UNIVERSE WEEKLY",
         summary: (reportData.summary as string) || "",
+        weeklySummary: (reportData.weeklySummary as string) || "",
         highlights: Array.isArray(reportData.highlights)
           ? (reportData.highlights as WeeklyHighlight[])
           : [],
@@ -323,6 +311,7 @@ export default function WeeklyClient() {
           : [],
         stats: (reportData.stats as WeeklyStats) || {
           totalEvents: 0,
+          totalDiaries: 0,
           mostCommonMood: "未知",
           mostVisitedDimension: "7-B",
           activeDays: 0,

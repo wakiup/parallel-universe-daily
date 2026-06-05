@@ -13,6 +13,7 @@ import {
   Cloud,
   BarChart3,
   Quote,
+  BookOpen,
 } from "lucide-react";
 import gsap from "gsap";
 import { cn } from "@/lib/utils";
@@ -41,10 +42,12 @@ export interface WeeklyDailyEntry {
   color: "quantum" | "plasma" | "pink";
   dimension: string;
   eventCount: number;
+  diaryCount: number;
 }
 
 export interface WeeklyStats {
   totalEvents: number;
+  totalDiaries: number;
   mostCommonMood: string;
   mostVisitedDimension: string;
   activeDays: number;
@@ -55,6 +58,7 @@ export interface WeeklyReport {
   week: string;
   title: string;
   summary: string;
+  weeklySummary: string;
   highlights: WeeklyHighlight[];
   dailyEntries: WeeklyDailyEntry[];
   stats: WeeklyStats;
@@ -426,11 +430,21 @@ function DayGrid({ entries }: { entries: WeeklyDailyEntry[] }) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Globe className="w-3 h-3 text-static/40" />
-                    <span className="text-[10px] font-mono text-static/50">
-                      {entry.dimension}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    {entry.diaryCount > 0 && (
+                      <div className="flex items-center gap-1">
+                        <BookOpen className="w-3 h-3 text-static/40" />
+                        <span className="text-[10px] font-mono text-static/50">
+                          {entry.diaryCount}篇日记
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <Globe className="w-3 h-3 text-static/40" />
+                      <span className="text-[10px] font-mono text-static/50">
+                        {entry.dimension}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -472,10 +486,17 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
       sub: "across 7 days",
     },
     {
+      label: "日记总数",
+      value: stats.totalDiaries,
+      icon: <BookOpen className="w-5 h-5" />,
+      color: "plasma" as const,
+      sub: "diaries written",
+    },
+    {
       label: "最常见心情",
       value: stats.mostCommonMood,
       icon: <Sparkles className="w-5 h-5" />,
-      color: "plasma" as const,
+      color: "pink" as const,
       sub: "dominant mood",
     },
     {
@@ -514,7 +535,7 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
       {/* Stats grid */}
       <div
         ref={statsRef}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-2 lg:grid-cols-5 gap-4"
       >
         {statCards.map((stat, index) => {
           const colors = COLOR_MAP[stat.color];
