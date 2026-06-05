@@ -239,13 +239,27 @@ export default function WeeklyClient() {
         dimension: "7-B",
       };
     });
-    // Prioritize newspaper highlights, fill remaining with diaries
-    const allHighlights = [...paperHighlights, ...diaryHighlights];
-    const shuffled = allHighlights.sort(() => Math.random() - 0.5);
-    // Ensure at least one newspaper highlight is first (for "本周最佳")
-    const firstPaper = paperHighlights.length > 0 ? paperHighlights[Math.floor(Math.random() * paperHighlights.length)] : null;
-    const rest = shuffled.filter((h) => h.id !== firstPaper?.id).slice(0, 2);
-    const highlights: WeeklyHighlight[] = firstPaper ? [firstPaper, ...rest] : shuffled.slice(0, 3);
+    // Build highlights: newspaper first, then diaries, no duplicates
+    const allHighlights: WeeklyHighlight[] = [];
+    const usedIds = new Set<string>();
+    // Pick one random newspaper as "本周最佳"
+    if (paperHighlights.length > 0) {
+      const pick = paperHighlights[Math.floor(Math.random() * paperHighlights.length)];
+      allHighlights.push(pick);
+      usedIds.add(pick.id);
+    }
+    // Fill remaining slots from shuffled pool (newspapers first, then diaries)
+    const pool = [...paperHighlights, ...diaryHighlights]
+      .filter((h) => !usedIds.has(h.id))
+      .sort(() => Math.random() - 0.5);
+    for (const h of pool) {
+      if (allHighlights.length >= 3) break;
+      if (!usedIds.has(h.id)) {
+        allHighlights.push(h);
+        usedIds.add(h.id);
+      }
+    }
+    const highlights = allHighlights;
 
     const moodCounts: Record<string, number> = {};
     const dimCounts: Record<string, number> = {};
