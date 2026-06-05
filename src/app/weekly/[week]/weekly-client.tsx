@@ -237,6 +237,7 @@ export default function WeeklyClient() {
         mood: "平静",
         color: "plasma",
         dimension: "7-B",
+        diaryId: dy.id,
       };
     });
     // Build highlights: newspaper first, then diaries, no duplicates (by ID and content)
