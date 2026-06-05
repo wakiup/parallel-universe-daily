@@ -542,6 +542,7 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
       icon: <Zap className="w-5 h-5" />,
       color: "quantum" as const,
       sub: "across 7 days",
+      tooltip: "本周报纸记录的所有平行宇宙异常事件",
     },
     {
       label: "日记总数",
@@ -549,6 +550,7 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
       icon: <BookOpen className="w-5 h-5" />,
       color: "plasma" as const,
       sub: "diaries written",
+      tooltip: "本周用户撰写的日记篇数",
     },
     {
       label: "最常见心情",
@@ -556,6 +558,7 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
       icon: <Sparkles className="w-5 h-5" />,
       color: "pink" as const,
       sub: "dominant mood",
+      tooltip: "本周出现次数最多的情绪状态",
     },
     {
       label: "最常访问维度",
@@ -563,6 +566,7 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
       icon: <Globe className="w-5 h-5" />,
       color: "pink" as const,
       sub: "primary dimension",
+      tooltip: "本周涉及最多的平行宇宙维度编号",
     },
     {
       label: "活跃天数",
@@ -570,6 +574,7 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
       icon: <Calendar className="w-5 h-5" />,
       color: "quantum" as const,
       sub: "of 7 days",
+      tooltip: "本周有事件或日记记录的天数",
     },
   ];
 
@@ -601,12 +606,18 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
             <div
               key={index}
               className={cn(
-                "stat-item relative rounded-2xl border backdrop-blur-sm overflow-hidden transition-all duration-300 hover:-translate-y-0.5",
+                "stat-item group relative rounded-2xl border backdrop-blur-sm overflow-hidden transition-all duration-300 hover:-translate-y-0.5",
                 colors.statBorder,
                 colors.hoverBorder,
                 colors.glow
               )}
             >
+              {/* Tooltip */}
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                <div className="bg-abyss/95 border border-quantum/20 rounded-lg px-3 py-2 text-xs text-static/80 shadow-xl whitespace-nowrap">
+                  {stat.tooltip}
+                </div>
+              </div>
               <div className={cn("h-px bg-gradient-to-r", colors.gradient)} />
               <div className="bg-abyss/60 p-5 sm:p-6 text-center">
                 <div
