@@ -697,6 +697,7 @@ export function WeeklyReportDisplay({
   dateRange: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -706,7 +707,7 @@ export function WeeklyReportDisplay({
     setExportError(null);
     try {
       const { toPng } = await import("html-to-image");
-      const dataUrl = await toPng(containerRef.current!, {
+      const dataUrl = await toPng(exportRef.current!, {
         backgroundColor: "#0a0a1a",
         pixelRatio: 2,
       });
@@ -762,14 +763,16 @@ export function WeeklyReportDisplay({
         </div>
       )}
 
-      <CoverSection
-        report={report}
-        weekNum={weekNum}
-        year={year}
-        dateRange={dateRange}
-      />
-      <WeeklySummary summary={report.weeklySummary} />
-      <HighlightsSection highlights={report.highlights} week={report.week} />
+      <div ref={exportRef}>
+        <CoverSection
+          report={report}
+          weekNum={weekNum}
+          year={year}
+          dateRange={dateRange}
+        />
+        <WeeklySummary summary={report.weeklySummary} />
+        <HighlightsSection highlights={report.highlights} week={report.week} />
+      </div>
       <DayGrid entries={report.dailyEntries} />
       <StatsSection stats={report.stats} />
       <FooterQuote />
