@@ -34,6 +34,7 @@ export interface WeeklyHighlight {
   mood: string;
   color: "quantum" | "plasma" | "pink";
   dimension: string;
+  newspaperId?: string;
   diaryId?: string;
 }
 
@@ -287,7 +288,7 @@ function HighlightsSection({ highlights, week }: { highlights: WeeklyHighlight[]
           return (
             <Link
               key={hl.id}
-              href={hl.diaryId ? `/diary/${dayToDate(hl.day)}?diaryId=${hl.diaryId}` : `/diary/${dayToDate(hl.day)}`}
+              href={hl.newspaperId ? `/newspaper/${hl.newspaperId}` : hl.diaryId ? `/diary/${dayToDate(hl.day)}?diaryId=${hl.diaryId}` : `/diary/${dayToDate(hl.day)}`}
               className={cn(
                 "highlight-card group relative rounded-2xl border backdrop-blur-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer block",
                 colors.border,

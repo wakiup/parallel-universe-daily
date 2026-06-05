@@ -224,6 +224,7 @@ export default function WeeklyClient() {
         mood: p.mood,
         color: p.color,
         dimension: p.dimension,
+        newspaperId: p.id,
       };
     });
     const diaryHighlights: WeeklyHighlight[] = weekDiaries.map((dy, i) => {
