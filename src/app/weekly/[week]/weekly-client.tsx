@@ -213,7 +213,7 @@ export default function WeeklyClient() {
       }
     }
 
-    // Build highlights from both newspapers and diaries
+    // Build highlights from newspapers first, then diaries
     const paperHighlights: WeeklyHighlight[] = weekNewspapers.map((p, i) => {
       const d = new Date(p.timestamp.split(" ")[0] + "T00:00:00");
       return {
@@ -239,9 +239,13 @@ export default function WeeklyClient() {
         dimension: "7-B",
       };
     });
+    // Prioritize newspaper highlights, fill remaining with diaries
     const allHighlights = [...paperHighlights, ...diaryHighlights];
     const shuffled = allHighlights.sort(() => Math.random() - 0.5);
-    const highlights: WeeklyHighlight[] = shuffled.slice(0, 3);
+    // Ensure at least one newspaper highlight is first (for "本周最佳")
+    const firstPaper = paperHighlights.length > 0 ? paperHighlights[Math.floor(Math.random() * paperHighlights.length)] : null;
+    const rest = shuffled.filter((h) => h.id !== firstPaper?.id).slice(0, 2);
+    const highlights: WeeklyHighlight[] = firstPaper ? [firstPaper, ...rest] : shuffled.slice(0, 3);
 
     const moodCounts: Record<string, number> = {};
     const dimCounts: Record<string, number> = {};

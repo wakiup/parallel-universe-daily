@@ -295,7 +295,7 @@ function HighlightsSection({ highlights, week }: { highlights: WeeklyHighlight[]
                 colors.border,
                 colors.hoverBorder,
                 colors.glow,
-                isLarge && "md:col-span-2 md:row-span-2"
+                isLarge && "md:col-span-2"
               )}
             >
               {/* Top accent line */}
