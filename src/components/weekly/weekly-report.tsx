@@ -17,6 +17,7 @@ import {
   FileText,
 } from "lucide-react";
 import gsap from "gsap";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -224,7 +225,26 @@ function WeeklySummary({ summary }: { summary: string }) {
 // HighlightsSection - Top 3 events
 // ---------------------------------------------------------------------------
 
-function HighlightsSection({ highlights }: { highlights: WeeklyHighlight[] }) {
+function HighlightsSection({ highlights, week }: { highlights: WeeklyHighlight[]; week: string }) {
+  const dayToDate = (dayName: string): string => {
+    const DAY_MAP: Record<string, number> = { "周一": 0, "周二": 1, "周三": 2, "周四": 3, "周五": 4, "周六": 5, "周日": 6 };
+    const dayIndex = DAY_MAP[dayName];
+    if (dayIndex === undefined) return "";
+    const match = week.match(/^(\d{4})-W(\d{2})$/);
+    if (!match) return "";
+    const year = parseInt(match[1], 10);
+    const weekNum = parseInt(match[2], 10);
+    const jan4 = new Date(year, 0, 4);
+    const dayOfWeekJan4 = jan4.getDay() || 7;
+    const week1Start = new Date(jan4);
+    week1Start.setDate(jan4.getDate() - dayOfWeekJan4 + 1);
+    const startDate = new Date(week1Start);
+    startDate.setDate(week1Start.getDate() + (weekNum - 1) * 7);
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + dayIndex);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -265,10 +285,11 @@ function HighlightsSection({ highlights }: { highlights: WeeklyHighlight[] }) {
           const isLarge = index === 0;
 
           return (
-            <div
+            <Link
               key={hl.id}
+              href={`/diary/${dayToDate(hl.day)}`}
               className={cn(
-                "highlight-card group relative rounded-2xl border backdrop-blur-sm overflow-hidden transition-all duration-300 hover:-translate-y-1",
+                "highlight-card group relative rounded-2xl border backdrop-blur-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer block",
                 colors.border,
                 colors.hoverBorder,
                 colors.glow,
@@ -350,7 +371,7 @@ function HighlightsSection({ highlights }: { highlights: WeeklyHighlight[] }) {
                   )}
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -404,10 +425,11 @@ function DayGrid({ entries }: { entries: WeeklyDailyEntry[] }) {
           const isFirstLarge = index === 0;
 
           return (
-            <div
+            <Link
               key={entry.date}
+              href={`/diary/${entry.date}`}
               className={cn(
-                "day-card group relative rounded-xl border backdrop-blur-sm overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg",
+                "day-card group relative rounded-xl border backdrop-blur-sm overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer block",
                 colors.border,
                 colors.hoverBorder,
                 colors.glow,
@@ -484,7 +506,7 @@ function DayGrid({ entries }: { entries: WeeklyDailyEntry[] }) {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -685,7 +707,7 @@ export function WeeklyReportDisplay({
         dateRange={dateRange}
       />
       <WeeklySummary summary={report.weeklySummary} />
-      <HighlightsSection highlights={report.highlights} />
+      <HighlightsSection highlights={report.highlights} week={report.week} />
       <DayGrid entries={report.dailyEntries} />
       <StatsSection stats={report.stats} />
       <FooterQuote />
