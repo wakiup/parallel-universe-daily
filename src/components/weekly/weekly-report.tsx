@@ -698,23 +698,26 @@ export function WeeklyReportDisplay({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const handleExport = async () => {
     if (isExporting) return;
     setIsExporting(true);
+    setExportError(null);
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(containerRef.current!, {
+      const { toPng } = await import("html-to-image");
+      const dataUrl = await toPng(containerRef.current!, {
         backgroundColor: "#0a0a1a",
-        scale: 2,
-        useCORS: true,
+        pixelRatio: 2,
       });
       const link = document.createElement("a");
       link.download = `parallel-universe-weekly-${report.week}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
       link.click();
-    } catch {
-      // silent fail
+    } catch (err) {
+      console.error("Export failed:", err);
+      setExportError("导出失败，请重试");
+      setTimeout(() => setExportError(null), 3000);
     } finally {
       setIsExporting(false);
     }
@@ -753,6 +756,11 @@ export function WeeklyReportDisplay({
         )}
         {isExporting ? "导出中..." : "导出图片"}
       </button>
+      {exportError && (
+        <div className="absolute top-16 right-4 z-20 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+          {exportError}
+        </div>
+      )}
 
       <CoverSection
         report={report}
