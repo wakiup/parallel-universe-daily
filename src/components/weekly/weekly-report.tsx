@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   Newspaper,
   Sparkles,
@@ -15,6 +15,8 @@ import {
   Quote,
   BookOpen,
   FileText,
+  Download,
+  Loader2,
 } from "lucide-react";
 import gsap from "gsap";
 import Link from "next/link";
@@ -695,6 +697,28 @@ export function WeeklyReportDisplay({
   dateRange: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(containerRef.current!, {
+        backgroundColor: "#0a0a1a",
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement("a");
+      link.download = `parallel-universe-weekly-${report.week}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch {
+      // silent fail
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -710,7 +734,26 @@ export function WeeklyReportDisplay({
   }, []);
 
   return (
-    <div ref={containerRef} className="space-y-0">
+    <div ref={containerRef} className="space-y-0 relative">
+      {/* Export button */}
+      <button
+        onClick={handleExport}
+        disabled={isExporting}
+        className={cn(
+          "absolute top-4 right-4 z-20 flex items-center gap-1.5 rounded-lg px-3 py-2",
+          "border border-quantum/20 bg-abyss/80 backdrop-blur-sm text-xs font-medium text-void-text",
+          "transition-all duration-200 hover:border-quantum/40 hover:text-quantum",
+          "disabled:pointer-events-none disabled:opacity-40"
+        )}
+      >
+        {isExporting ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <Download className="w-3.5 h-3.5" />
+        )}
+        {isExporting ? "导出中..." : "导出图片"}
+      </button>
+
       <CoverSection
         report={report}
         weekNum={weekNum}
