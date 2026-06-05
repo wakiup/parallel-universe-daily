@@ -254,13 +254,10 @@ function HighlightsSection({ highlights, week }: { highlights: WeeklyHighlight[]
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const cards = sectionRef.current.querySelectorAll(".highlight-card");
-    gsap.from(cards, {
-      opacity: 0,
-      y: 40,
-      duration: 0.7,
-      ease: "power3.out",
-      stagger: 0.15,
-    });
+    gsap.fromTo(cards,
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.15 }
+    );
   }, [highlights]);
 
   return (
@@ -393,13 +390,10 @@ function DayGrid({ entries }: { entries: WeeklyDailyEntry[] }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const cards = gridRef.current.querySelectorAll(".day-card");
-    gsap.from(cards, {
-      opacity: 0,
-      y: 30,
-      duration: 0.6,
-      ease: "power2.out",
-      stagger: 0.08,
-    });
+    gsap.fromTo(cards,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.08 }
+    );
   }, [entries]);
 
   return (
@@ -528,13 +522,10 @@ function StatsSection({ stats }: { stats: WeeklyStats }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const items = statsRef.current.querySelectorAll(".stat-item");
-    gsap.from(items, {
-      opacity: 0,
-      scale: 0.9,
-      duration: 0.5,
-      ease: "back.out(1.4)",
-      stagger: 0.1,
-    });
+    gsap.fromTo(items,
+      { opacity: 0, scale: 0.9 },
+      { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)", stagger: 0.1 }
+    );
   }, [stats]);
 
   const statCards = [
@@ -728,13 +719,10 @@ export function WeeklyReportDisplay({
     if (!containerRef.current) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    gsap.from(".weekly-cover", {
-      opacity: 0,
-      y: 50,
-      duration: 1,
-      ease: "power3.out",
-      delay: 0.1,
-    });
+    gsap.fromTo(".weekly-cover",
+      { opacity: 0, y: 50 },
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out", delay: 0.1 }
+    );
   }, []);
 
   return (
