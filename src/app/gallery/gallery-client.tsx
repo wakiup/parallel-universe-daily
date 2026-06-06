@@ -44,7 +44,7 @@ export function GalleryClient() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-void">
-      <DesktopNav activePage={"gallery" as any} />
+      <DesktopNav activePage="gallery" />
       <main className="flex-1 pb-20 md:pb-0">
         <div className="border-b border-quantum/10 px-6 py-4">
           <div className="flex items-center justify-between">

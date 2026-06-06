@@ -389,3 +389,9 @@
 .safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* Export mode - hide decorative borders for clean screenshots */
+.exporting,
+.exporting * {
+  box-shadow: none !important;
+}

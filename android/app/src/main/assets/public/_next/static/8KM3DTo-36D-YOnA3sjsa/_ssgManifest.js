@@ -1,0 +1,1 @@
+self.__SSG_MANIFEST=new Set(["\u002Fdiary\u002F[date]","\u002Fgallery\u002F[id]","\u002Fnewspaper\u002F[id]","\u002Fweekly\u002F[week]"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()

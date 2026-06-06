@@ -3,8 +3,6 @@
 import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import {
   Newspaper,
-  History,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Scroll,

@@ -387,7 +387,12 @@ export async function generateNewspaper(
   }
 
   const jsonStr = rawText.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
-  const parsed = JSON.parse(jsonStr);
+  let parsed: Record<string, string> = {};
+  try {
+    parsed = JSON.parse(jsonStr);
+  } catch {
+    parsed = { headline: input, subheadline: "", content: rawText || input };
+  }
   const now = new Date();
 
   return {
@@ -464,5 +469,9 @@ export async function generateWeeklyReport(week: string): Promise<Record<string,
   }
 
   const jsonStr = rawText.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
-  return JSON.parse(jsonStr);
+  try {
+    return JSON.parse(jsonStr);
+  } catch {
+    throw new Error("AI 返回的内容格式异常，请重试。原始内容：" + rawText.slice(0, 200));
+  }
 }

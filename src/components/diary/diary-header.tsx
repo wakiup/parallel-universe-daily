@@ -43,33 +43,24 @@ function ChronicleHeader({ date }: { date: string }) {
   return (
     <div className="flex flex-col items-center text-center">
       {/* 顶部：绝密标签 */}
-      <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.35em] text-nebula-pink">
+      <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.35em] text-nebula-pink">
         CLASSIFIED · 绝密
       </p>
 
       {/* 中间：主标题，带边框装饰 */}
-      <div className="relative px-6 py-3">
-        {/* 上边框 */}
-        <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-quantum/40 to-transparent" />
-        {/* 下边框 */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-quantum/40 to-transparent" />
-        {/* 左侧竖线 */}
-        <div className="absolute bottom-0 left-0 top-0 w-px bg-gradient-to-b from-transparent via-quantum/40 to-transparent" />
-        {/* 右侧竖线 */}
-        <div className="absolute bottom-0 right-0 top-0 w-px bg-gradient-to-b from-transparent via-quantum/40 to-transparent" />
-
+      <div className="px-8 py-4 border border-quantum/40 rounded">
         <h1 className="font-serif text-2xl font-bold tracking-wide text-signal sm:text-3xl">
           平行宇宙编年史 · 日记卷
         </h1>
       </div>
 
       {/* 底部：宇宙纪元 + 档案编号 */}
-      <p className="mt-3 font-mono text-xs tracking-wider text-void-text">
+      <p className="mt-4 font-mono text-xs tracking-wider text-void-text">
         宇宙纪元 {year}.{String(month).padStart(2, "0")}.{String(day).padStart(2, "0")} · 档案编号 PUD-{mmdd}
       </p>
 
       {/* 分割线 */}
-      <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-quantum/30 to-transparent" />
+      <div className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-quantum/30 to-transparent" />
     </div>
   );
 }

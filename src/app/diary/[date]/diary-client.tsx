@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import {
   Newspaper,
@@ -39,6 +39,10 @@ export default function DiaryClient() {
   const [manualContent, setManualContent] = useState("");
   const [processMode, setProcessMode] = useState<ProcessMode>("none");
   const [isSaving, setIsSaving] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"events" | "diary">("events");
+
+  const diariesRef = useRef(diaries);
+  diariesRef.current = diaries;
 
   const selectedDiary = diaries.find((d) => d.id === selectedDiaryId) ?? null;
 
@@ -132,6 +136,7 @@ export default function DiaryClient() {
       await appendDiary(diaryResult);
       setDiaries((prev) => [...prev, diaryResult]);
       setSelectedDiaryId(diaryResult.id);
+      setMobileTab("diary");
     } catch {
       setError("生成失败，请稍后重试");
       setTimeout(() => setError(null), 5000);
@@ -170,11 +175,8 @@ export default function DiaryClient() {
       await deleteDiaryById(idToDelete);
       setDiaries((prev) => {
         const updated = prev.filter((d) => d.id !== idToDelete);
+        setSelectedDiaryId(updated.length > 0 ? updated[updated.length - 1].id : null);
         return updated;
-      });
-      setSelectedDiaryId((prev) => {
-        const remaining = diaries.filter((d) => d.id !== idToDelete);
-        return remaining.length > 0 ? remaining[remaining.length - 1].id : null;
       });
     } catch {
       setError("删除失败，请稍后重试");
@@ -270,8 +272,41 @@ export default function DiaryClient() {
       <DesktopNav activePage="diary" showBackArrow date={displayDate} />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 h-[calc(100vh-7rem)]">
-          <div className="diary-left-panel flex flex-col overflow-y-auto rounded-2xl border border-quantum/10 bg-abyss/40 backdrop-blur-sm p-5">
+        {/* Mobile tabs - only visible on mobile */}
+        <div className="md:hidden flex items-center gap-2 mb-4 p-1 bg-abyss/60 rounded-xl border border-quantum/10">
+          <button
+            onClick={() => setMobileTab("events")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+              mobileTab === "events"
+                ? "bg-quantum/15 text-quantum border border-quantum/20"
+                : "text-static hover:text-signal"
+            )}
+          >
+            <Newspaper className="w-4 h-4" />
+            事件与日记
+          </button>
+          <button
+            onClick={() => setMobileTab("diary")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+              mobileTab === "diary"
+                ? "bg-quantum/15 text-quantum border border-quantum/20"
+                : "text-static hover:text-signal"
+            )}
+          >
+            <BookOpen className="w-4 h-4" />
+            日记内容
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 h-[calc(100vh-9rem)] md:h-[calc(100vh-7rem)]">
+          {/* Left panel - hidden on mobile unless events tab is active */}
+          <div className={cn(
+            "diary-left-panel flex flex-col overflow-y-auto rounded-2xl border border-quantum/10 bg-abyss/40 backdrop-blur-sm p-5",
+            "md:flex",
+            mobileTab === "events" ? "flex" : "hidden"
+          )}>
             <EventList
               events={events}
               onGenerate={handleGenerate}
@@ -328,7 +363,10 @@ export default function DiaryClient() {
                     return (
                       <button
                         key={d.id}
-                        onClick={() => setSelectedDiaryId(d.id)}
+                        onClick={() => {
+                          setSelectedDiaryId(d.id);
+                          setMobileTab("diary");
+                        }}
                         className={cn(
                           "w-full text-left rounded-xl p-3 transition-all duration-200 border",
                           isSelected
@@ -368,7 +406,12 @@ export default function DiaryClient() {
             </div>
           </div>
 
-          <div className="diary-right-panel relative overflow-hidden rounded-2xl border border-quantum/10 bg-abyss/40 backdrop-blur-sm">
+          {/* Right panel - hidden on mobile unless diary tab is active */}
+          <div className={cn(
+            "diary-right-panel relative overflow-hidden rounded-2xl border border-quantum/10 bg-abyss/40 backdrop-blur-sm",
+            "md:flex md:flex-col",
+            mobileTab === "diary" ? "flex flex-col" : "hidden"
+          )}>
             {loading ? (
               <div className="flex h-full items-center justify-center">
                 <div className="flex flex-col items-center gap-3">

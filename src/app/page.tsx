@@ -6,7 +6,7 @@ import { loadNewspapers, addNewspaper, saveNewspapers, deleteNewspaper, type New
 import { generateNewspaper } from "@/lib/client-api";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { DesktopNav } from "@/components/desktop-nav";
-import { Newspaper, BookOpen, Calendar, Clock, Sparkles, Send, History, Settings, Star, Radio, Wifi, Globe, ArrowRight, BookMarked, Trash2 } from "lucide-react";
+import { Newspaper, BookOpen, Calendar, Clock, Sparkles, Send, Star, Radio, Wifi, Globe, ArrowRight, BookMarked, Trash2 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
