@@ -68,7 +68,7 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
   const handleDownload = useCallback(async () => {
     if (!dataUrl) return;
     try {
-      const isNative = typeof window !== "undefined" && window.location.protocol === "capacitor:";
+      const isNative = typeof (window as any).Capacitor !== "undefined";
       if (isNative) {
         const { Filesystem, Directory } = await import("@capacitor/filesystem");
         const base64 = dataUrl.split(",")[1];
@@ -76,9 +76,9 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
         await Filesystem.writeFile({
           path: fileName,
           data: base64,
-          directory: Directory.Documents,
+          directory: Directory.Cache,
         });
-        alert(`已保存到 Documents/${fileName}`);
+        alert("已保存到应用缓存目录");
       } else {
         const res = await fetch(dataUrl);
         const blob = await res.blob();
