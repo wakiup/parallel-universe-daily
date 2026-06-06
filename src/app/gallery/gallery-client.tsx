@@ -121,9 +121,20 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
           </div>
         ) : dataUrl ? (
           <div className="flex flex-col items-center gap-4 p-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={dataUrl} alt={item.title} className="w-full rounded-xl shadow-2xl" />
-            <p className="text-sm text-static/60">长按图片 → 保存图片</p>
+            <button
+              onClick={() => {
+                const w = window.open("", "_blank");
+                if (w) {
+                  w.document.write(`<img src="${dataUrl}" style="max-width:100%;background:#0A0A0F">`);
+                  w.document.title = item.title;
+                }
+              }}
+              className="w-full cursor-pointer"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={dataUrl} alt={item.title} className="w-full rounded-xl shadow-2xl" />
+            </button>
+            <p className="text-sm text-static/60">点击图片在浏览器打开 → 长按保存</p>
           </div>
         ) : null}
 
