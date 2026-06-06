@@ -36,13 +36,14 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
       await new Promise((r) => setTimeout(r, 100));
       if (cancelled || !renderRef.current) return;
       try {
-        const domtoimage = await import("dom-to-image-more");
-        const url = await domtoimage.toJpeg(renderRef.current, {
-          backgroundColor: "#000000",
-          pixelRatio: 4,
-          cacheBust: true,
-          quality: 1.0,
+        const html2canvas = (await import("html2canvas")).default;
+        const canvas = await html2canvas(renderRef.current, {
+          backgroundColor: "#0A0A0F",
+          scale: 4,
+          useCORS: true,
+          logging: false,
         });
+        const url = canvas.toDataURL("image/jpeg", 1.0);
         if (!cancelled) {
           setDataUrl(url);
           setIsRendering(false);
