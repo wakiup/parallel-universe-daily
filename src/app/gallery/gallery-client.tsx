@@ -68,16 +68,20 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
   const handleDownload = useCallback(async () => {
     if (!dataUrl) return;
     try {
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const file = new File([blob], `${item.title}.jpg`, { type: "image/jpeg" });
-
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          title: item.title,
-          files: [file],
+      const isNative = typeof window !== "undefined" && window.location.protocol === "capacitor:";
+      if (isNative) {
+        const { Filesystem, Directory } = await import("@capacitor/filesystem");
+        const base64 = dataUrl.split(",")[1];
+        const fileName = `gallery-${Date.now()}.jpg`;
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64,
+          directory: Directory.Documents,
         });
+        alert(`已保存到 Documents/${fileName}`);
       } else {
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -89,6 +93,7 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
       }
     } catch (err) {
       console.error("Download failed:", err);
+      alert("保存失败：" + (err instanceof Error ? err.message : String(err)));
     }
   }, [dataUrl, item.title]);
 
