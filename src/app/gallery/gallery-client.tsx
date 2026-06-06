@@ -122,20 +122,31 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
         ) : dataUrl ? (
           <div className="flex flex-col items-center gap-4 p-4">
             <button
-              onClick={async () => {
-                try {
-                  const { Browser } = await import("@capacitor/browser");
-                  await Browser.open({ url: dataUrl, toolbarColor: "#0A0A0F" });
-                } catch (e) {
-                  console.log("Browser.open failed:", e);
-                }
+              onClick={() => {
+                // Convert data URL to blob and create object URL
+                // This triggers the DownloadListener with a regular HTTP-like URL
+                fetch(dataUrl)
+                  .then(res => res.blob())
+                  .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `${item.title}.jpg`;
+                    a.style.display = "none";
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }, 100);
+                  });
               }}
               className="w-full cursor-pointer"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={dataUrl} alt={item.title} className="w-full rounded-xl shadow-2xl" />
             </button>
-            <p className="text-sm text-static/60">点击图片在浏览器打开 → 长按保存</p>
+            <p className="text-sm text-static/60">点击图片保存到手机</p>
           </div>
         ) : null}
 

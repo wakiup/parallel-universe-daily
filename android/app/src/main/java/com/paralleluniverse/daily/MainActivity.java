@@ -3,13 +3,18 @@ package com.paralleluniverse.daily;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.CookieManager;
+import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -76,9 +81,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
                 try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(url));
-                    startActivity(intent);
+                    // For blob URLs and data URLs, handle differently
+                    if (url.startsWith("blob:") || url.startsWith("data:")) {
+                        // Let the WebView handle it internally
+                        return;
+                    }
+
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    String fileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+                    request.setTitle(fileName);
+                    request.setMimeType(mimetype);
+                    request.addRequestHeader("Cookie", CookieManager.getInstance().getCookie(url));
+
+                    DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                    dm.enqueue(request);
+                    Toast.makeText(MainActivity.this, "开始下载: " + fileName, Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     Toast.makeText(MainActivity.this, "下载失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
