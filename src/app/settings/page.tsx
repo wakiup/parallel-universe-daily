@@ -357,6 +357,7 @@ export default function SettingsPage() {
       settings: JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"),
       diaries: JSON.parse(localStorage.getItem("parallel-universe-diaries") || "[]"),
       newspapers: JSON.parse(localStorage.getItem("parallel-universe-newspapers") || "[]"),
+      gallery: JSON.parse(localStorage.getItem("parallel-universe-gallery") || "[]"),
       exportedAt: new Date().toISOString(),
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -382,6 +383,7 @@ export default function SettingsPage() {
           if (data.settings) localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings));
           if (data.diaries) localStorage.setItem("parallel-universe-diaries", JSON.stringify(data.diaries));
           if (data.newspapers) localStorage.setItem("parallel-universe-newspapers", JSON.stringify(data.newspapers));
+          if (data.gallery) localStorage.setItem("parallel-universe-gallery", JSON.stringify(data.gallery));
           window.location.reload();
         } catch {
           alert("文件格式不正确，请选择正确的备份文件");
