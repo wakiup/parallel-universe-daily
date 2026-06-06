@@ -10,10 +10,12 @@ import {
   History,
   Settings,
   ArrowLeft,
+  Image,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { NavLink } from "@/components/nav-link";
 
-export type ActivePage = "today" | "diary" | "weekly" | "history" | "settings" | "newspaper";
+export type ActivePage = "today" | "diary" | "weekly" | "history" | "settings" | "newspaper" | "gallery";
 
 interface DesktopNavProps {
   activePage?: ActivePage;
@@ -102,6 +104,18 @@ export function DesktopNav({
 
           {/* Right side */}
           <div className="hidden sm:flex items-center gap-3">
+            <Link
+              href="/gallery"
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors",
+                activePage === "gallery"
+                  ? "text-quantum bg-quantum/10"
+                  : "text-static/50 hover:text-signal"
+              )}
+            >
+              <Image className="size-4" />
+              <span className="hidden lg:inline">画廊</span>
+            </Link>
             {/* Dimension badge */}
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-quantum/8 border border-quantum/15">
               <div className="w-1.5 h-1.5 bg-quantum rounded-full animate-pulse" />
