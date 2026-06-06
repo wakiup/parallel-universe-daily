@@ -67,33 +67,46 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
 
   const handleDownload = useCallback(async () => {
     if (!dataUrl) return;
+
+    // Method 1: Try Capacitor native save
     try {
-      const isNative = typeof (window as any).Capacitor !== "undefined";
-      if (isNative) {
-        const { Filesystem, Directory } = await import("@capacitor/filesystem");
-        const base64 = dataUrl.split(",")[1];
-        const fileName = `gallery-${Date.now()}.jpg`;
-        await Filesystem.writeFile({
-          path: fileName,
-          data: base64,
-          directory: Directory.Cache,
-        });
-        alert("已保存到应用缓存目录");
-      } else {
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${item.title}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      const { Filesystem, Directory } = await import("@capacitor/filesystem");
+      const base64 = dataUrl.split(",")[1];
+      const fileName = `gallery-${Date.now()}.jpg`;
+      await Filesystem.writeFile({
+        path: fileName,
+        data: base64,
+        directory: Directory.Cache,
+      });
+      alert("已保存到应用缓存目录");
+      return;
+    } catch (e) {
+      console.log("Capacitor save failed, trying web download:", e);
+    }
+
+    // Method 2: Try Web Share API
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], `${item.title}.jpg`, { type: "image/jpeg" });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ title: item.title, files: [file] });
+        return;
       }
-    } catch (err) {
-      console.error("Download failed:", err);
-      alert("保存失败：" + (err instanceof Error ? err.message : String(err)));
+    } catch (e) {
+      console.log("Share failed, trying direct download:", e);
+    }
+
+    // Method 3: Direct download (works in browser)
+    try {
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `${item.title}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {
+      alert("保存失败，请长按图片手动保存");
     }
   }, [dataUrl, item.title]);
 
