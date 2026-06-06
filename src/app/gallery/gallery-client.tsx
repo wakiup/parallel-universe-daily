@@ -122,13 +122,13 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
         ) : dataUrl ? (
           <div className="flex flex-col items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={dataUrl} alt={item.title} className="w-full max-w-4xl rounded-xl shadow-2xl" />
+            <img src={dataUrl} alt={item.title} className="w-full rounded-xl shadow-2xl" />
             <p className="text-xs text-static/40">长按图片可保存到相册</p>
           </div>
         ) : null}
 
         {/* Visible render target — rendered at full width to match actual page */}
-        <div ref={renderRef} className="mx-auto max-w-4xl">
+        <div ref={renderRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="space-y-0">
             {isDiary ? (
               <>
