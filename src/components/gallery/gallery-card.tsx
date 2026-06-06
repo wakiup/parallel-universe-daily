@@ -20,7 +20,7 @@ export function GalleryCard({ item, onDelete }: GalleryCardProps) {
 
   return (
     <Link
-      href={`/gallery/${item.id}`}
+      href={`/gallery?id=${item.id}`}
       className={cn(
         "group relative block rounded-xl border border-quantum/10 bg-abyss/60 p-4",
         "transition-all duration-200 hover:border-quantum/25 hover:bg-abyss/80",
