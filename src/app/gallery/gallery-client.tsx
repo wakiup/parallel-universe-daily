@@ -68,28 +68,16 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
   const handleDownload = useCallback(async () => {
     if (!dataUrl) return;
     try {
-      const isNative = typeof window !== "undefined" && window.location.protocol === "capacitor:";
-      if (isNative) {
-        const { Filesystem, Directory } = await import("@capacitor/filesystem");
-        const { Share } = await import("@capacitor/share");
-        const base64 = dataUrl.split(",")[1];
-        const fileName = `gallery-${item.id}.jpg`;
-        await Filesystem.writeFile({
-          path: fileName,
-          data: base64,
-          directory: Directory.Cache,
-        });
-        const uri = await Filesystem.getUri({
-          path: fileName,
-          directory: Directory.Cache,
-        });
-        await Share.share({
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], `${item.title}.jpg`, { type: "image/jpeg" });
+
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
           title: item.title,
-          files: [uri.uri],
+          files: [file],
         });
       } else {
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -102,7 +90,7 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
     } catch (err) {
       console.error("Download failed:", err);
     }
-  }, [dataUrl, item.id, item.title]);
+  }, [dataUrl, item.title]);
 
   if (error) {
     return (
