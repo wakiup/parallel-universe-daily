@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
-import { RefreshCw, Download, Share2, Newspaper, Sparkles, Check, Image, PenLine, FileText, Trash2 } from "lucide-react";
-import { toJpeg } from "html-to-image";
+import { useState, useCallback, useEffect } from "react";
+import { RefreshCw, Share2, Newspaper, Sparkles, Check, PenLine, FileText, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DiaryHeader } from "./diary-header";
 import { formatMarkdown } from "@/lib/markdown";
 import type { DiaryEntry } from "@/lib/types";
+import { addToGallery } from "@/lib/gallery";
 
 interface DiaryContentProps {
   diary: DiaryEntry | null;
@@ -96,8 +96,6 @@ export function DiaryContent({
   onDelete,
   isGenerating,
 }: DiaryContentProps) {
-  const exportRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [showOriginal, setShowOriginal] = useState(false);
@@ -106,28 +104,20 @@ export function DiaryContent({
     setToast({ message, type });
   }, []);
 
-  const handleExport = useCallback(async () => {
-    if (!exportRef.current || isExporting) return;
-    setIsExporting(true);
-    try {
-      const dataUrl = await toJpeg(exportRef.current, {
-        backgroundColor: "#0A0A0F",
-        pixelRatio: 2,
-        cacheBust: true,
-        quality: 0.95,
-      });
-      const link = document.createElement("a");
-      link.download = `parallel-universe-diary-${diary?.date || "unknown"}.jpg`;
-      link.href = dataUrl;
-      link.click();
-      showToast("长图已保存到本地", "success");
-    } catch (err) {
-      console.error("Export failed:", err);
-      showToast("导出失败，请稍后重试", "error");
-    } finally {
-      setIsExporting(false);
-    }
-  }, [diary, isExporting, showToast]);
+  const handleExport = useCallback(() => {
+    if (!diary) return;
+    addToGallery({
+      type: "diary",
+      title: `${diary.date} 日记`,
+      content: diary.content,
+      rawContent: diary.rawContent,
+      style: diary.style,
+      processMode: diary.processMode,
+      date: diary.date,
+    });
+    showToast("已保存到画廊", "success");
+    window.location.href = "/gallery";
+  }, [diary, showToast]);
 
   const handleShare = useCallback(async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -142,6 +132,7 @@ export function DiaryContent({
     if (navigator.share) {
       try {
         await navigator.share(shareData);
+        showToast("分享成功", "success");
         return;
       } catch (err) {
         // User cancelled or share unavailable — fall through to clipboard
@@ -153,13 +144,28 @@ export function DiaryContent({
 
     // Fallback: copy rich text to clipboard
     try {
-      await navigator.clipboard.writeText(shareData.text);
-      setShareState("copied");
-      showToast("已复制到剪贴板", "success");
-      setTimeout(() => setShareState("idle"), 2000);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareData.text);
+        setShareState("copied");
+        showToast("已复制到剪贴板", "success");
+        setTimeout(() => setShareState("idle"), 2000);
+      } else {
+        // Fallback for older browsers
+        const textarea = document.createElement("textarea");
+        textarea.value = shareData.text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        setShareState("copied");
+        showToast("已复制到剪贴板", "success");
+        setTimeout(() => setShareState("idle"), 2000);
+      }
     } catch (err) {
       console.error("Clipboard write failed:", err);
-      showToast("复制失败，请长按手动复制", "error");
+      showToast("复制失败，请长按文本手动复制", "error");
     }
   }, [diary, showToast]);
 
@@ -178,40 +184,40 @@ export function DiaryContent({
     <div className="flex h-full flex-col">
       {/* 内容区：可滚动 */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
+        {/* 对比视图切换 - 在导出区域外面 */}
+        {hasComparison && (
+          <div className="mb-4 flex items-center gap-1 rounded-xl border border-quantum/10 bg-abyss/60 p-1">
+            <button
+              onClick={() => setShowOriginal(false)}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200",
+                !showOriginal
+                  ? "bg-quantum/15 text-quantum border border-quantum/20"
+                  : "text-static hover:text-void-text"
+              )}
+            >
+              <Sparkles className="size-3.5" />
+              AI 加工后
+            </button>
+            <button
+              onClick={() => setShowOriginal(true)}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200",
+                showOriginal
+                  ? "bg-quantum/15 text-quantum border border-quantum/20"
+                  : "text-static hover:text-void-text"
+              )}
+            >
+              <PenLine className="size-3.5" />
+              原文
+            </button>
+          </div>
+        )}
+
         {/* Export target area */}
-        <div ref={exportRef} className="bg-void rounded-xl p-6">
+        <div className="bg-void rounded-xl p-6">
           {/* 报头 */}
           <DiaryHeader style={style} date={diary.date} />
-
-          {/* 对比视图切换 */}
-          {hasComparison && (
-            <div className="mt-6 flex items-center gap-1 rounded-xl border border-quantum/10 bg-abyss/60 p-1">
-              <button
-                onClick={() => setShowOriginal(false)}
-                className={cn(
-                  "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200",
-                  !showOriginal
-                    ? "bg-quantum/15 text-quantum border border-quantum/20"
-                    : "text-static hover:text-void-text"
-                )}
-              >
-                <Sparkles className="size-3.5" />
-                AI 加工后
-              </button>
-              <button
-                onClick={() => setShowOriginal(true)}
-                className={cn(
-                  "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200",
-                  showOriginal
-                    ? "bg-quantum/15 text-quantum border border-quantum/20"
-                    : "text-static hover:text-void-text"
-                )}
-              >
-                <PenLine className="size-3.5" />
-                原文
-              </button>
-            </div>
-          )}
 
           {/* 正文内容 */}
           {showOriginal && hasComparison ? (
@@ -247,54 +253,53 @@ export function DiaryContent({
         />
       )}
 
-      {/* 操作按钮区 */}
-      <div className="flex items-center gap-3 border-t border-quantum/10 px-4 py-3">
+      {/* 操作按钮区 - Mobile optimized */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 border-t border-quantum/10 px-3 py-3 sm:px-4">
         <button
           onClick={onRegenerate}
           disabled={isGenerating}
           className={cn(
-            "flex items-center gap-2 rounded-lg px-4 py-2",
+            "flex items-center justify-center gap-2 rounded-xl px-4 py-3 sm:py-2 min-h-[44px]",
             "bg-quantum/10 text-quantum border border-quantum/20",
             "text-sm font-medium",
             "transition-all duration-200 hover:bg-quantum/20 hover:border-quantum/30",
             "active:scale-[0.97]",
-            "disabled:pointer-events-none disabled:opacity-40"
+            "disabled:pointer-events-none disabled:opacity-40",
+            "flex-1 sm:flex-none"
           )}
         >
           <RefreshCw
             className={cn("size-4", isGenerating && "animate-spin")}
           />
-          {isGenerating ? "生成中..." : "重新生成"}
+          <span className="hidden sm:inline">{isGenerating ? "生成中..." : "重新生成"}</span>
+          <span className="sm:hidden">{isGenerating ? "生成中" : "重新生成"}</span>
         </button>
 
         <button
           onClick={handleExport}
-          disabled={isExporting}
           className={cn(
-            "flex items-center gap-2 rounded-lg px-4 py-2",
+            "flex items-center justify-center gap-2 rounded-xl px-4 py-3 sm:py-2 min-h-[44px]",
             "bg-quantum/10 text-quantum border border-quantum/20",
             "text-sm font-medium",
             "transition-all duration-200 hover:bg-quantum/20 hover:border-quantum/30",
             "active:scale-[0.97]",
-            "disabled:pointer-events-none disabled:opacity-40"
+            "flex-1 sm:flex-none"
           )}
         >
-          {isExporting ? (
-            <Image className="size-4 animate-pulse" />
-          ) : (
-            <Download className="size-4" />
-          )}
-          {isExporting ? "导出中..." : "导出长图"}
+          <Sparkles className="size-4" />
+          <span className="hidden sm:inline">保存到画廊</span>
+          <span className="sm:hidden">保存</span>
         </button>
 
         <button
           onClick={handleShare}
           className={cn(
-            "flex items-center gap-2 rounded-lg px-4 py-2",
+            "flex items-center justify-center gap-2 rounded-xl px-4 py-3 sm:py-2 min-h-[44px]",
             "bg-quantum/10 text-quantum border border-quantum/20",
             "text-sm font-medium",
             "transition-all duration-200 hover:bg-quantum/20 hover:border-quantum/30",
-            "active:scale-[0.97]"
+            "active:scale-[0.97]",
+            "flex-1 sm:flex-none"
           )}
         >
           {shareState === "copied" ? (
@@ -302,21 +307,23 @@ export function DiaryContent({
           ) : (
             <Share2 className="size-4" />
           )}
-          {shareState === "copied" ? "已复制链接" : "分享"}
+          <span className="hidden sm:inline">{shareState === "copied" ? "已复制链接" : "分享"}</span>
+          <span className="sm:hidden">{shareState === "copied" ? "已复制" : "分享"}</span>
         </button>
 
         <button
           onClick={onDelete}
           className={cn(
-            "flex items-center gap-2 rounded-lg px-4 py-2",
+            "flex items-center justify-center gap-2 rounded-xl px-4 py-3 sm:py-2 min-h-[44px]",
             "bg-red-500/10 text-red-400 border border-red-500/20",
-            "text-sm font-medium ml-auto",
+            "text-sm font-medium sm:ml-auto",
             "transition-all duration-200 hover:bg-red-500/20 hover:border-red-500/30",
-            "active:scale-[0.97]"
+            "active:scale-[0.97]",
+            "flex-1 sm:flex-none sm:flex-none"
           )}
         >
           <Trash2 className="size-4" />
-          删除
+          <span className="hidden sm:inline">删除</span>
         </button>
       </div>
     </div>
