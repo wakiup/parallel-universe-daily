@@ -122,11 +122,12 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
         ) : dataUrl ? (
           <div className="flex flex-col items-center gap-4 p-4">
             <button
-              onClick={() => {
-                const w = window.open("", "_blank");
-                if (w) {
-                  w.document.write(`<img src="${dataUrl}" style="max-width:100%;background:#0A0A0F">`);
-                  w.document.title = item.title;
+              onClick={async () => {
+                try {
+                  const { Browser } = await import("@capacitor/browser");
+                  await Browser.open({ url: dataUrl, toolbarColor: "#0A0A0F" });
+                } catch (e) {
+                  console.log("Browser.open failed:", e);
                 }
               }}
               className="w-full cursor-pointer"
