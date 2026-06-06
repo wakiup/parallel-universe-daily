@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   Newspaper,
   Sparkles,
@@ -15,12 +15,11 @@ import {
   Quote,
   BookOpen,
   FileText,
-  Download,
-  Loader2,
 } from "lucide-react";
 import gsap from "gsap";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { addToGallery } from "@/lib/gallery";
 
 // ---------------------------------------------------------------------------
 // Types (mirrors the API response types)
@@ -136,10 +135,10 @@ function CoverSection({
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-quantum/10 rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative px-6 sm:px-12 py-12 sm:py-16">
+      <div className="px-6 sm:px-12 py-12 sm:py-16">
         {/* Masthead */}
         <div className="mb-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-quantum/15 border border-quantum/30 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-quantum/15 mb-6">
             <Newspaper className="w-3.5 h-3.5 text-quantum" />
             <span className="text-[10px] font-mono text-quantum tracking-wider uppercase">
               Magazine Edition
@@ -171,8 +170,8 @@ function CoverSection({
 
         {/* Editor's note */}
         <div className="max-w-2xl mx-auto">
-          <div className="relative border border-quantum/15 rounded-2xl bg-void/60 p-6 sm:p-8">
-            <div className="absolute -top-3 left-6 px-3 py-0.5 rounded-full bg-abyss border border-quantum/30">
+          <div className="border border-quantum/15 rounded-2xl bg-void/60 p-6 sm:p-8">
+            <div className="px-3 py-0.5 rounded-full bg-abyss border border-quantum/30 w-fit mb-4">
               <span className="text-[10px] font-mono text-quantum tracking-wider">
                 EDITOR&apos;S NOTE
               </span>
@@ -690,32 +689,16 @@ export function WeeklyReportDisplay({
   dateRange: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const exportRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
 
-  const handleExport = async () => {
-    if (isExporting) return;
-    setIsExporting(true);
-    setExportError(null);
-    try {
-      const { toPng } = await import("html-to-image");
-      const dataUrl = await toPng(exportRef.current!, {
-        backgroundColor: "#0a0a1a",
-        pixelRatio: 2,
-      });
-      const link = document.createElement("a");
-      link.download = `parallel-universe-weekly-${report.week}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error("Export failed:", err);
-      setExportError("导出失败，请重试");
-      setTimeout(() => setExportError(null), 3000);
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  const handleExport = useCallback(() => {
+    addToGallery({
+      type: "weekly",
+      title: `${year}年 第${weekNum}周 周报`,
+      content: JSON.stringify(report),
+      date: report.week,
+    });
+    window.location.href = "/gallery";
+  }, [report, weekNum, year]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -732,28 +715,19 @@ export function WeeklyReportDisplay({
       {/* Export button */}
       <button
         onClick={handleExport}
-        disabled={isExporting}
         className={cn(
-          "absolute top-4 right-4 z-20 flex items-center gap-1.5 rounded-lg px-3 py-2",
-          "border border-quantum/20 bg-abyss/80 backdrop-blur-sm text-xs font-medium text-void-text",
-          "transition-all duration-200 hover:border-quantum/40 hover:text-quantum",
-          "disabled:pointer-events-none disabled:opacity-40"
+          "absolute top-4 right-4 z-20 flex items-center gap-1.5 rounded-lg px-3 py-1.5",
+          "bg-quantum/10 text-quantum border border-quantum/20",
+          "text-xs font-medium backdrop-blur-sm",
+          "transition-all hover:bg-quantum/20",
+          "active:scale-[0.97]"
         )}
       >
-        {isExporting ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Download className="w-3.5 h-3.5" />
-        )}
-        {isExporting ? "导出中..." : "导出图片"}
+        <Sparkles className="size-3.5" />
+        保存到画廊
       </button>
-      {exportError && (
-        <div className="absolute top-16 right-4 z-20 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
-          {exportError}
-        </div>
-      )}
 
-      <div ref={exportRef}>
+      <div>
         <CoverSection
           report={report}
           weekNum={weekNum}
