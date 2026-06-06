@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Image, Trash2, ArrowLeft, Sparkles } from "lucide-react";
+import { Image, Trash2, ArrowLeft, Sparkles, Download } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { GalleryCard } from "@/components/gallery/gallery-card";
@@ -65,6 +65,24 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
     router.push("/gallery");
   }, [item.id, router]);
 
+  const handleDownload = useCallback(async () => {
+    if (!dataUrl) return;
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${item.title}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
+  }, [dataUrl, item.title]);
+
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center">
@@ -123,7 +141,13 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
           <div className="flex flex-col items-center gap-4 p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={dataUrl} alt={item.title} className="w-full rounded-xl shadow-2xl" />
-            <p className="text-xs text-static/40">长按图片可保存到相册</p>
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-2 rounded-xl bg-quantum/20 px-6 py-3 text-sm font-medium text-quantum transition-colors hover:bg-quantum/30"
+            >
+              <Download className="size-4" />
+              保存图片
+            </button>
           </div>
         ) : null}
 
