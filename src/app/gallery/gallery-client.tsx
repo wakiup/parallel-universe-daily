@@ -68,7 +68,23 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
   const handleDownload = useCallback(async () => {
     if (!dataUrl) return;
 
-    // Method 1: Try Capacitor native save
+    // Method 1: Try Capacitor native save to ExternalStorage
+    try {
+      const { Filesystem, Directory } = await import("@capacitor/filesystem");
+      const base64 = dataUrl.split(",")[1];
+      const fileName = `平行宇宙-${item.date}.jpg`;
+      await Filesystem.writeFile({
+        path: fileName,
+        data: base64,
+        directory: Directory.ExternalStorage,
+      });
+      alert(`已保存到外部存储：${fileName}`);
+      return;
+    } catch (e) {
+      console.log("Capacitor ExternalStorage failed, trying Cache:", e);
+    }
+
+    // Method 1b: Try Cache directory
     try {
       const { Filesystem, Directory } = await import("@capacitor/filesystem");
       const base64 = dataUrl.split(",")[1];
