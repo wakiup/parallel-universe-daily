@@ -102,7 +102,7 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto">
         {isRendering ? (
           <div className="flex flex-col items-center justify-center gap-4 py-20">
             <div className="relative">
@@ -120,16 +120,16 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
             </div>
           </div>
         ) : dataUrl ? (
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={dataUrl} alt={item.title} className="w-full rounded-xl shadow-2xl" />
             <p className="text-xs text-static/40">长按图片可保存到相册</p>
           </div>
         ) : null}
 
-        {/* Visible render target — rendered at full width to match actual page */}
-        <div ref={renderRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="space-y-0">
+        {/* Render target — full width, no centering offset */}
+        <div ref={renderRef}>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-0">
             {isDiary ? (
               <>
                 <DiaryHeader style={item.style ?? "newspaper"} date={item.date} />
