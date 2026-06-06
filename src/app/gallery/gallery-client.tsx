@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Image, Trash2, ArrowLeft, Sparkles, Download } from "lucide-react";
+import { Image, Trash2, ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { GalleryCard } from "@/components/gallery/gallery-card";
@@ -65,34 +65,6 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
     router.push("/gallery");
   }, [item.id, router]);
 
-  const handleDownload = useCallback(async () => {
-    if (!dataUrl) {
-      alert("图片还未渲染完成，请稍候");
-      return;
-    }
-
-    // Try direct download
-    try {
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `${item.title}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      return;
-    } catch (e) {
-      console.log("Direct download failed:", e);
-    }
-
-    // Copy to clipboard
-    try {
-      await navigator.clipboard.writeText(dataUrl);
-      alert("图片链接已复制！\n\n请在手机浏览器中粘贴打开，然后长按图片保存。");
-    } catch (e) {
-      prompt("请复制以下链接，在浏览器中打开保存图片：", dataUrl);
-    }
-  }, [dataUrl, item.title]);
-
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center">
@@ -151,13 +123,7 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
           <div className="flex flex-col items-center gap-4 p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={dataUrl} alt={item.title} className="w-full rounded-xl shadow-2xl" />
-            <button
-              onClick={handleDownload}
-              className="flex items-center gap-2 rounded-xl bg-quantum/20 px-6 py-3 text-sm font-medium text-quantum transition-colors hover:bg-quantum/30"
-            >
-              <Download className="size-4" />
-              保存图片
-            </button>
+            <p className="text-sm text-static/60">长按图片 → 保存图片</p>
           </div>
         ) : null}
 
