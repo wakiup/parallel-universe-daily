@@ -66,49 +66,43 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
   }, [item.id, router]);
 
   const handleDownload = useCallback(async () => {
-    if (!dataUrl) return;
+    if (!renderRef.current) return;
 
-    // Method 1: Try Capacitor native save to /Download/
     try {
-      const { Filesystem, Directory } = await import("@capacitor/filesystem");
-      const base64 = dataUrl.split(",")[1];
-      const fileName = `平行宇宙-${item.date}.jpg`;
-      await Filesystem.writeFile({
-        path: `Download/${fileName}`,
-        data: base64,
-        directory: Directory.ExternalStorage,
+      const { domToDataUrl } = await import("modern-screenshot");
+      // Generate a shareable version at 1x scale
+      const shareUrl = await domToDataUrl(renderRef.current, {
+        backgroundColor: "#0A0A0F",
+        scale: 1,
+        quality: 0.9,
+        type: "image/jpeg",
       });
-      alert(`已保存到 Download 目录：${fileName}`);
-      return;
-    } catch (e) {
-      console.log("Capacitor save failed, trying web download:", e);
-    }
 
-    // Method 2: Try Web Share API
-    try {
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const file = new File([blob], `${item.title}.jpg`, { type: "image/jpeg" });
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ title: item.title, files: [file] });
+      // Try native download first
+      try {
+        const a = document.createElement("a");
+        a.href = shareUrl;
+        a.download = `${item.title}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         return;
+      } catch (e) {
+        // fallback to clipboard
       }
-    } catch (e) {
-      console.log("Share failed, trying direct download:", e);
-    }
 
-    // Method 3: Direct download (works in browser)
-    try {
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `${item.title}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (e) {
-      alert("保存失败，请长按图片手动保存");
+      // Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("图片链接已复制！\n\n请在手机浏览器中粘贴打开，然后长按图片保存。");
+      } catch (e) {
+        prompt("请复制以下链接，在浏览器中打开保存图片：", shareUrl);
+      }
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("导出失败，请重试");
     }
-  }, [dataUrl, item.title]);
+  }, [item.title]);
 
   if (error) {
     return (
