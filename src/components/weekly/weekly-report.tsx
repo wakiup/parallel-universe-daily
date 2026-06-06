@@ -682,11 +682,13 @@ export function WeeklyReportDisplay({
   weekNum,
   year,
   dateRange,
+  capturing = false,
 }: {
   report: WeeklyReport;
   weekNum: number;
   year: number;
   dateRange: string;
+  capturing?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -712,7 +714,8 @@ export function WeeklyReportDisplay({
 
   return (
     <div ref={containerRef} className="space-y-0 relative">
-      {/* Export button */}
+      {/* Export button — hidden during gallery capture */}
+      {!capturing && (
       <button
         onClick={handleExport}
         className={cn(
@@ -726,6 +729,7 @@ export function WeeklyReportDisplay({
         <Sparkles className="size-3.5" />
         保存到画廊
       </button>
+      )}
 
       <div>
         <CoverSection

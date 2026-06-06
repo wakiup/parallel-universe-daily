@@ -127,9 +127,14 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
           </div>
         ) : null}
 
-        {/* Render target — full width, no centering offset */}
-        <div ref={renderRef}>
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-0">
+        {/* Render target — matches actual page layout and background */}
+        <div ref={renderRef} className="min-h-screen bg-void relative overflow-hidden">
+          {/* Background gradient circles — matching actual page */}
+          <div className="absolute -top-40 -left-40 w-[800px] h-[800px] bg-quantum/4 rounded-full blur-[150px]" />
+          <div className="absolute top-1/3 -right-20 w-[600px] h-[600px] bg-plasma/4 rounded-full blur-[130px]" />
+          <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] bg-nebula-pink/3 rounded-full blur-[120px]" />
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-0">
             {isDiary ? (
               <>
                 <DiaryHeader style={item.style ?? "newspaper"} date={item.date} />
@@ -150,6 +155,7 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
                   weekNum={parseInt(item.date.split("-W")[1])}
                   year={parseInt(item.date.split("-W")[0])}
                   dateRange={item.date}
+                  capturing
                 />
               )
             )}
