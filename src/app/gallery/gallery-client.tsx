@@ -66,43 +66,32 @@ function PreviewView({ item, onBack }: { item: GalleryItem; onBack: () => void }
   }, [item.id, router]);
 
   const handleDownload = useCallback(async () => {
-    if (!renderRef.current) return;
-
-    try {
-      const { domToDataUrl } = await import("modern-screenshot");
-      // Generate a shareable version at 1x scale
-      const shareUrl = await domToDataUrl(renderRef.current, {
-        backgroundColor: "#0A0A0F",
-        scale: 1,
-        quality: 0.9,
-        type: "image/jpeg",
-      });
-
-      // Try native download first
-      try {
-        const a = document.createElement("a");
-        a.href = shareUrl;
-        a.download = `${item.title}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      } catch (e) {
-        // fallback to clipboard
-      }
-
-      // Copy to clipboard
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert("图片链接已复制！\n\n请在手机浏览器中粘贴打开，然后长按图片保存。");
-      } catch (e) {
-        prompt("请复制以下链接，在浏览器中打开保存图片：", shareUrl);
-      }
-    } catch (err) {
-      console.error("Export failed:", err);
-      alert("导出失败，请重试");
+    if (!dataUrl) {
+      alert("图片还未渲染完成，请稍候");
+      return;
     }
-  }, [item.title]);
+
+    // Try direct download
+    try {
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `${item.title}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    } catch (e) {
+      console.log("Direct download failed:", e);
+    }
+
+    // Copy to clipboard
+    try {
+      await navigator.clipboard.writeText(dataUrl);
+      alert("图片链接已复制！\n\n请在手机浏览器中粘贴打开，然后长按图片保存。");
+    } catch (e) {
+      prompt("请复制以下链接，在浏览器中打开保存图片：", dataUrl);
+    }
+  }, [dataUrl, item.title]);
 
   if (error) {
     return (
